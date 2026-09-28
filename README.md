@@ -24,38 +24,36 @@ npm run preview    # 本機預覽正式建置
 
 線上網址：`https://yd7148.github.io/yd7148-v3/`（免費，專案頁）
 
-推送即部署 —— [deploy.yml](.github/workflows/deploy.yml) 會在每次 push 到 `main` 時：
-
-```
-npm ci → 產生 .env（個資來自 repository secrets）→ npm run build → npm run verify:build → 上傳 dist
-```
-
-首次設定（在 GitHub 網頁介面做一次即可）：
-
-1. repo → **Settings → Pages → Source** 選 **GitHub Actions**
-2. repo → **Settings → Secrets and variables → Actions → New repository secret**，新增 7 個：
-   `PUBLIC_BIRTH`、`PUBLIC_MOBILE`、`PUBLIC_EMAIL`、`PUBLIC_EMAIL_WORK`、
-   `PUBLIC_TEL_OFFICE`、`PUBLIC_ADDRESS_ZH`、`PUBLIC_ADDRESS_EN`
-3. 手動觸發一次：Actions → **Deploy to GitHub Pages** → Run workflow
-
-之後日常維護只要：
+目前採用 **`gh-pages` 分支發布**：`dist/` 的產物直接推到那條分支，GitHub 直接拿來當網站。
 
 ```bash
-git add -A && git commit -m "..." && git push
+npm run build        # astro build + scripts/fix-base.mjs（補 /yd7148-v3/ 路徑前綴）
+npm run verify:build # 隱私閘關：公開頁有個資就中止
+npm run deploy       # 上面兩步 + 推送 gh-pages（約 30 秒後生效）
 ```
 
-### 為什麼要 scripts/  裡那三支
-
-| 檔案 | 解決什麼問題 |
+| 指令 | 作用 |
 |---|---|
-| `scripts/fix-base.mjs` | GitHub Pages 專案頁在子路徑 `/yd7148-v3/`，所有 `href="/zh/"`、`src="/images/..."` 都缺前綴。建置後統一改寫 `dist` 的 HTML 與 `robots.txt`，比改 50 多處模板安全。 |
-| `scripts/pii.cjs` | 提供「個資探針」，讓驗證腳本能在公開頁面上檢查有沒有洩漏；探針本身從 `.env` 讀，**不含真實值**。 |
-| `scripts/verify-build.mjs` | 部署前的隱私閘關：確認 `robots.txt` 仍擋住 `/resume/`，且除 `/resume/` 外沒有任何公開頁含個資。不通過就中止部署。 |
+| `npm run dev` | 本機開發伺服器，`http://localhost:4323/`（dev 不加 base 前綴） |
+| `npm run check` | Astro / TypeScript 型別檢查 |
+| `npm run build` | 正式建置 + 路徑修補 |
+| `npm run verify:build` | 部署前隱私檢查（公開頁零個資、robots 擋住 `/resume/`） |
+| `npm run deploy` | 建置 → 檢查 → 推 `gh-pages` |
+| `node scripts/smoke-pages.mjs` | 在本機用 `/yd7148-v3/` 的路徑模擬 Pages，跑 11 條路由 |
+| `node scripts/smoke-live.mjs` | 對線上三個站台各跑 11 條路由 |
+| `node verify.cjs` | 截圖 + 溢出 / console / PII 遮罩檢查（需 dev 伺服器在跑） |
 
-### 路徑策略
+### scripts/ 解決的三個問題
 
-`astro.config.mjs` 的 `base` 只有在 `NODE_ENV=production` 時才等於 `/yd7148-v3`，
-所以 `npm run dev` 的網址維持 `http://localhost:4323/zh/`，不必多打一段。
+| 檔案 | 問題 |
+|---|---|
+| `fix-base.mjs` | Pages 專案頁在子路徑 `/yd7148-v3/`，所有 `href="/zh/"`、`src="/images/..."` 都缺前綴；建置後統一改寫 `dist` 的 HTML、meta-refresh 與 `robots.txt`。 |
+| `pii.cjs` | 提供「個資探針」給驗證腳本；探針從 `.env` 讀，**本身不含真實值**。 |
+| `verify-build.mjs` | 部署前的隱私閘關。不通過就中止部署。 |
+
+`publish-ghpages.mjs` 會在 gh-pages 根目錄放一個 **`.nojekyll`** ——
+少了它，GitHub Pages 會用 Jekyll 建置，然後安靜地丟掉 `/_astro/` 底下的全部 CSS/JS
+（網站會長得像沒套版型）。
 
 ---
 
@@ -64,12 +62,21 @@ git add -A && git commit -m "..." && git push
 個資**不寫在原始碼裡**，改由 `.env` 提供（`.env` 已在 `.gitignore`）。
 
 ```bash
-cp .env.example .env    # 第一次
-npm run build           # 之後只要 .env 有值就能建置
+cp .env.example .env   # 第一次
+npm run build          # 之後只要 .env 有值就能建置
 ```
 
 影響範圍只有 `/{lang}/resume/`（A4 列印履歷）。換信箱、搬家、換手機號碼時
 **只改 `.env`，不用動版控、不用重新 commit**。
+
+| 變數 | 用途 |
+|---|---|
+| `PUBLIC_BIRTH` | 出生年月（列印履歷） |
+| `PUBLIC_MOBILE` | 手機 |
+| `PUBLIC_EMAIL` | 個人信箱（也是 Web3Forms 收件信箱） |
+| `PUBLIC_EMAIL_WORK` | 公司信箱 |
+| `PUBLIC_TEL_OFFICE` | 辦公室電話 + 分機 |
+| `PUBLIC_ADDRESS_ZH` / `PUBLIC_ADDRESS_EN` | 完整地址（中 / 英） |
 
 ## 資訊架構
 
@@ -160,10 +167,10 @@ frontmatter 欄位：
 ## 驗證
 
 ```bash
-npm run check                                  # 型別檢查（0 errors）
-npm run build                                  # 22 頁
-node verify.cjs                                # 截圖 + 溢出 / console / 遮罩檢查
-$env:BASE="http://localhost:4500"; node verify.cjs   # 對正式建置跑
+npm run check         # 型別檢查
+npm run build         # 建置 + 路徑修補
+npm run verify:build  # 隱私閘關
+npm run deploy        # 建置 + 檢查 + 推 gh-pages
 ```
 
 `verify.cjs` 會檢查：每頁 HTTP 狀態、橫向溢出、console 錯誤、深淺色截圖、手機 375px、**個資遮罩在螢幕與列印下的行為**、並產生 A4 PDF 到 `shots/resume-A4.pdf`。
