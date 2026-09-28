@@ -1,0 +1,1098 @@
+---
+import "../styles/global.css";
+import { getCollection } from "astro:content";
+import { identity, experience, education, certifications } from "../data/resume";
+import { contact } from "../data/contact";
+import { SITE_URL } from "../lib/i18n";
+
+const abs = (p: string) => new URL(p, SITE_URL).href;
+
+/* ---------- bilingual data pairing ---------- */
+
+const allWorks = await getCollection("works");
+const allNotes = await getCollection("notes", (n) => !n.data.draft);
+const keyOf = (id: string) => id.replace(/-(zh|en)$/, "");
+
+const works = Array.from(new Set(allWorks.map((w) => keyOf(w.id))))
+  .map((k) => ({
+    key: k,
+    zh: allWorks.find((w) => keyOf(w.id) === k && w.data.lang === "zh"),
+    en: allWorks.find((w) => keyOf(w.id) === k && w.data.lang === "en")
+  }))
+  .filter((w) => w.zh && w.en)
+  .sort((a, b) => (a.zh!.data.order ?? 99) - (b.zh!.data.order ?? 99));
+
+const notes = Array.from(new Set(allNotes.map((n) => keyOf(n.id))))
+  .map((k) => ({
+    key: k,
+    zh: allNotes.find((n) => keyOf(n.id) === k && n.data.lang === "zh"),
+    en: allNotes.find((n) => keyOf(n.id) === k && n.data.lang === "en")
+  }))
+  .filter((n) => n.zh && n.en)
+  .sort(
+    (a, b) => b.zh!.data.pubDate.getTime() - a.zh!.data.pubDate.getTime()
+  );
+
+/* ---------- expertise (shared with Expertise.astro) ---------- */
+
+const expertiseIcons: Record<string, string> = {
+  detect:
+    '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/><path d="M11 8v6M8 11h6"/>',
+  fab: '<path d="M3 20h18"/><path d="M5 20V9l5 3V9l5 3V9l4 2v9"/><path d="M9 20v-4h6v4"/>',
+  thermal:
+    '<path d="M12 3v10"/><path d="M12 13a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/><path d="M8 6.5a6 6 0 0 0 0 11"/><path d="M16 6.5a6 6 0 0 1 0 11"/>',
+  edge: '<rect x="4" y="6" width="16" height="12" rx="2"/><path d="M9 10h.01M15 10h.01M9 14h6"/>',
+  quality:
+    '<path d="M4 19V5"/><path d="M4 19h16"/><rect x="7" y="11" width="3" height="5"/><rect x="12" y="8" width="3" height="8"/><rect x="17" y="13" width="3" height="3"/>',
+  globe:
+    '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z"/>'
+};
+
+const expertise = [
+  {
+    k: "detect",
+    zh: {
+      t: "SiC 晶圓缺陷檢測",
+      d: "以 YOLO 建立 TSD／TED／BPD 三類缺陷的標註資料集，比較 v8/v10/v11/v12 確認 v12 最佳。"
+    },
+    en: {
+      t: "SiC wafer defect detection",
+      d: "Built an annotated TSD/TED/BPD dataset and compared YOLO v8/v10/v11/v12 — v12 performed best."
+    }
+  },
+  {
+    k: "fab",
+    zh: {
+      t: "試驗工廠建立",
+      d: "SiC 高溫材料試驗產線從零建置，橫跨技術評估、環保法規、資材與人員整合。"
+    },
+    en: {
+      t: "Pilot fab build-out",
+      d: "An SiC high-temperature materials trial line built from scratch, spanning technical evaluation, environmental compliance, procurement and staffing."
+    }
+  },
+  {
+    k: "thermal",
+    zh: { t: "熱場模擬", d: "COMSOL 多物理量模擬支援高溫製程條件評估與熱場最佳化。" },
+    en: {
+      t: "Thermal simulation",
+      d: "COMSOL multiphysics simulation supporting high-temperature process evaluation and thermal optimisation."
+    }
+  },
+  {
+    k: "edge",
+    zh: {
+      t: "邊緣 AI 部署",
+      d: "NVIDIA Jetson 實作，讓推論在產線端即時完成，不依賴雲端連線。"
+    },
+    en: {
+      t: "Edge AI deployment",
+      d: "NVIDIA Jetson hands-on, so inference completes on the line instead of depending on a cloud link."
+    }
+  },
+  {
+    k: "quality",
+    zh: {
+      t: "良率與品質管理",
+      d: "配方改善、檢測規範建立、綠建材認證協助；台化地毯 9 年成本與績效管理。"
+    },
+    en: {
+      t: "Yield and quality management",
+      d: "Formulation improvement, inspection-standard authoring, US green-building certification support; nine years of cost and performance management."
+    }
+  },
+  {
+    k: "globe",
+    zh: { t: "外銷與國際溝通", d: "9 年外銷新客戶開發、客訴處理與展場規劃，TOEIC 825。" },
+    en: {
+      t: "Export and international work",
+      d: "Nine years of export new-business development, complaint handling and trade-fair planning. TOEIC 825."
+    }
+  }
+];
+
+const facts = [
+  { icon: "🧑‍💼", zh: { l: "職稱", v: identity.currentTitle.zh }, en: { l: "Role", v: identity.currentTitle.en } },
+  { icon: "📍", zh: { l: "地點", v: contact.city.zh }, en: { l: "Location", v: contact.city.en } },
+  { icon: "⏳", zh: { l: "經驗", v: "12 年製造業現場" }, en: { l: "Experience", v: "12 years on the floor" } },
+  { icon: "🧪", zh: { l: "領域", v: "SiC 第三代半導體" }, en: { l: "Focus", v: "SiC power devices" } }
+];
+
+const skillGroups = [
+  {
+    zh: "半導體與製程",
+    en: "Semiconductor & Process",
+    items: [
+      { zh: "碳化矽 SiC", en: "Silicon Carbide" },
+      { zh: "第三代半導體", en: "Third-gen Devices" },
+      { zh: "半導體製造", en: "Semiconductor Mfg" },
+      { zh: "廠務工程", en: "Facilities Eng" },
+      { zh: "製程改善", en: "Process Improvement" }
+    ]
+  },
+  {
+    zh: "AI 與機器視覺",
+    en: "AI & Machine Vision",
+    items: [
+      { zh: "YOLO", en: "YOLO" },
+      { zh: "缺陷檢測", en: "Defect Detection" },
+      { zh: "機器視覺", en: "Machine Vision" },
+      { zh: "深度學習", en: "Deep Learning" },
+      { zh: "邊緣 AI", en: "Edge AI" },
+      { zh: "NVIDIA Jetson", en: "NVIDIA Jetson" }
+    ]
+  },
+  {
+    zh: "模擬與數據",
+    en: "Simulation & Data",
+    items: [
+      { zh: "COMSOL 熱場模擬", en: "COMSOL Simulation" },
+      { zh: "良率分析", en: "Yield Analysis" },
+      { zh: "品質保證", en: "Quality Assurance" }
+    ]
+  },
+  {
+    zh: "專案與流程",
+    en: "Project & Workflow",
+    items: [
+      { zh: "專案管理", en: "Project Management" },
+      { zh: "成本與績效", en: "Cost & Performance" },
+      { zh: "綠建材認證", en: "Green Building" },
+      { zh: "外銷英文 TOEIC 825", en: "Export English (825)" }
+    ]
+  }
+];
+---
+
+<!doctype html>
+<html lang="zh-Hant-TW" data-theme-key="portfolio-theme">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{identity.name.zh} / {identity.name.en}｜SiC 半導體智慧製造 · Bilingual CV</title>
+    <meta
+      name="description"
+      content="劉士禎 Shih-Chen Liu — 廠務高級工程師 Senior Manufacturing Engineer，SiC 第三代半導體智慧製造、YOLO 缺陷檢測。中英文並列履歷。"
+    />
+    <link rel="canonical" href={abs("/")} />
+    <link rel="alternate" hreflang="zh-Hant-TW" href={abs("/zh/")} />
+    <link rel="alternate" hreflang="en" href={abs("/en/")} />
+    <link rel="alternate" hreflang="x-default" href={abs("/")} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#020617" id="meta-theme-color" />
+    <meta property="og:type" content="profile" />
+    <meta property="og:title" content={`${identity.name.zh} / ${identity.name.en}`} />
+    <meta
+      property="og:description"
+      content="廠務高級工程師 · Senior Manufacturing Engineer — SiC 第三代半導體智慧製造。中英文並列。"
+    />
+    <meta property="og:url" content={abs("/")} />
+    <meta property="og:site_name" content="Shih-Chen Liu" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="author" content="劉士禎 / Shih-Chen Liu" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap"
+    />
+    <script is:inline>
+      (function () {
+        try {
+          var key = document.documentElement.dataset.themeKey || "portfolio-theme";
+          if (localStorage.getItem(key) === "light") {
+            document.documentElement.setAttribute("data-theme", "light");
+            var m = document.getElementById("meta-theme-color");
+            if (m) m.setAttribute("content", "#f8fafc");
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a href="#main-content" class="sr-only focus:not-sr-only">Skip to main content</a>
+
+    <!-- 頂部：單語版本捷徑 + 主題切換 -->
+    <header class="glass-nav fixed inset-x-0 top-0 z-50">
+      <nav class="container-x px-5">
+        <div class="flex h-16 items-center justify-between">
+          <a href="/" class="gradient-text shrink-0 text-lg font-bold tracking-tight">
+            {identity.name.zh} <span class="text-dimmed">/</span> {identity.name.en}
+          </a>
+          <div class="flex items-center gap-3">
+            <a href="/zh/" class="cta-btn hidden sm:inline-flex" hreflang="zh-Hant-TW">中文版</a>
+            <a href="/en/" class="cta-btn hidden sm:inline-flex" hreflang="en">English</a>
+            <label class="switch" aria-label="Toggle light/dark mode" title="Toggle light / dark mode">
+              <span class="sun">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <g fill="#918155">
+                    <circle r="5" cy="12" cx="12"></circle>
+                    <path
+                      d="m21 13h-1a1 1 0 0 1 0-2h1a1 1 0 0 1 0 2zm-17 0h-1a1 1 0 0 1 0-2h1a1 1 0 0 1 0 2zm13.66-5.66a1 1 0 0 1-.66-.29 1 1 0 0 1 0-1.41l.71-.71a1 1 0 1 1 1.41 1.41l-.71.71a1 1 0 0 1-.75.29zm-12.02 12.02a1 1 0 0 1-.71-.29 1 1 0 0 1 0-1.41l.71-.66a1 1 0 1 1 1.41 1.41l-.71.71a1 1 0 0 1-.7.24zm6.36-14.36a1 1 0 0 1-1-1v-1a1 1 0 0 1 2 0v1a1 1 0 0 1-1 1zm0 17a1 1 0 0 1-1-1v-1a1 1 0 0 1 2 0v1a1 1 0 0 1-1 1zm-5.66-14.66a1 1 0 0 1-.7-.29l-.71-.71a1 1 0 0 1 1.41-1.41l.71.71a1 1 0 0 1 0 1.41l-.71.29zm12.02 12.02a1 1 0 0 1-.7-.29l-.66-.71a1 1 0 0 1 1.36-1.36l.71.71a1 1 0 0 1 0 1.41l-.71.29z"
+                    ></path>
+                  </g>
+                </svg>
+              </span>
+              <span class="moon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+                  <path
+                    d="m223.5 32c-123.5 0-223.5 100.3-223.5 224s100 224 223.5 224c60.6 0 115.5-24.2 155.8-63.4 5-4.9 6.3-12.5 3.1-18.7s-10.1-9.7-17-8.5c-9.8 1.7-19.8 2.6-30.1 2.6-96.9 0-175.5-78.8-175.5-176 0-65.8 36-123.1 89.3-153.3 6.1-3.5 9.2-10.5 7.7-17.3s-7.3-11.9-14.3-12.5c-6.3-.5-12.6-.8-19-.8z"
+                  ></path>
+                </svg>
+              </span>
+              <input type="checkbox" class="input" id="theme-checkbox" />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <!-- ================= HERO ================= -->
+      <section class="relative flex min-h-screen items-center overflow-hidden pt-24">
+        <div class="spotlight-bg" aria-hidden="true">
+          <div class="spotlight spotlight-1"></div>
+          <div class="spotlight spotlight-2"></div>
+          <div class="spotlight spotlight-3"></div>
+        </div>
+        <div class="container-x relative z-10 py-16">
+          <p class="eyebrow reveal mb-4 text-center">
+            Bilingual Résumé · 中英文並列履歷
+          </p>
+          <h1 class="gradient-text reveal text-center text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
+            {identity.name.zh} <span class="text-dimmed">/</span> {identity.name.en}
+          </h1>
+
+          <div class="bi-rows mt-10">
+            <div class="bi-pair">
+              <div class="text-backdrop reveal">
+                <p class="text-xl font-semibold text-body sm:text-2xl">{identity.currentTitle.zh}</p>
+                <p class="mt-1 text-sm text-dimmed">{identity.kicker.zh}</p>
+              </div>
+              <div class="text-backdrop reveal" style="transition-delay:.08s">
+                <p class="text-xl font-semibold text-body sm:text-2xl">{identity.currentTitle.en}</p>
+                <p class="mt-1 text-sm text-dimmed">{identity.kicker.en}</p>
+              </div>
+            </div>
+
+            <div class="bi-pair">
+              <p class="text-backdrop reveal text-base leading-relaxed text-muted" style="transition-delay:.12s">
+                {identity.lead.zh}
+              </p>
+              <p class="text-backdrop reveal text-base leading-relaxed text-muted" style="transition-delay:.2s">
+                {identity.lead.en}
+              </p>
+            </div>
+
+            <div class="bi-pair">
+              <p class="text-backdrop reveal text-base leading-relaxed text-muted">{identity.body.zh}</p>
+              <p class="text-backdrop reveal text-base leading-relaxed text-muted" style="transition-delay:.08s">
+                {identity.body.en}
+              </p>
+            </div>
+
+            <div class="bi-pair">
+              <div class="reveal flex flex-col gap-3 sm:flex-row">
+                <a href="/zh/contact/" class="btn-primary text-center">聯絡我</a>
+                <a href="/zh/resume/" class="btn-secondary text-center">A4 履歷</a>
+              </div>
+              <div class="reveal flex flex-col gap-3 sm:flex-row" style="transition-delay:.08s">
+                <a href="/en/contact/" class="btn-primary text-center">Contact me</a>
+                <a href="/en/resume/" class="btn-secondary text-center">Résumé</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= ABOUT ================= -->
+      <section id="about" class="bg-[var(--bg-section)] py-20">
+        <div class="container-x">
+          <div class="bi-head reveal">
+            <p class="eyebrow mb-3">認識我 · Get to know me</p>
+            <h2 class="section-title text-3xl font-bold sm:text-4xl lg:text-5xl">關於我 / About Me</h2>
+          </div>
+
+          <div class="bi-rows">
+            <div class="bi-pair">
+              <div class="card reveal">
+                <p class="leading-relaxed text-muted">{identity.summary.zh}</p>
+                <p class="mt-4 text-sm font-light text-highlight">「{identity.lead.zh}」</p>
+              </div>
+              <div class="card reveal" style="transition-delay:.08s">
+                <p class="leading-relaxed text-muted">{identity.summary.en}</p>
+                <p class="mt-4 text-sm font-light text-highlight">“{identity.lead.en}”</p>
+              </div>
+            </div>
+
+            {
+              facts.map((f) => (
+                <div class="bi-pair">
+                  <div class="card reveal flex items-start gap-4">
+                    <div class="svc-icon-box">
+                      <span class="text-xl leading-none" aria-hidden="true">
+                        {f.icon}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 class="font-semibold text-body">{f.zh.l}</h3>
+                      <p class="text-sm text-muted">{f.zh.v}</p>
+                    </div>
+                  </div>
+                  <div class="card reveal flex items-start gap-4" style="transition-delay:.06s">
+                    <div class="svc-icon-box">
+                      <span class="text-xl leading-none" aria-hidden="true">
+                        {f.icon}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 class="font-semibold text-body">{f.en.l}</h3>
+                      <p class="text-sm text-muted">{f.en.v}</p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= EXPERTISE ================= -->
+      <section id="expertise" class="py-20">
+        <div class="container-x">
+          <div class="bi-head reveal">
+            <p class="eyebrow mb-3">我怎麼做事 · How I work</p>
+            <h2 class="section-title text-3xl font-bold sm:text-4xl lg:text-5xl">專業領域 / Expertise</h2>
+          </div>
+
+          <div class="bi-rows">
+            {
+              expertise.map((x) => (
+                <div class="bi-pair">
+                  <div class="svc-card reveal">
+                    <div class="svc-inner">
+                      <div class="svc-icon-box">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          class="svc-svg"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.6"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          aria-hidden="true"
+                          set:html={expertiseIcons[x.k]}
+                        />
+                      </div>
+                      <div class="svc-content">
+                        <h3 class="svc-title">{x.zh.t}</h3>
+                        <p class="svc-desc">{x.zh.d}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="svc-card reveal" style="transition-delay:.06s">
+                    <div class="svc-inner">
+                      <div class="svc-icon-box">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          class="svc-svg"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.6"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          aria-hidden="true"
+                          set:html={expertiseIcons[x.k]}
+                        />
+                      </div>
+                      <div class="svc-content">
+                        <h3 class="svc-title">{x.en.t}</h3>
+                        <p class="svc-desc">{x.en.d}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= EXPERIENCE ================= -->
+      <section id="experience" class="bg-[var(--bg-section)] py-20">
+        <div class="container-x">
+          <div class="bi-head reveal">
+            <p class="eyebrow mb-3">在哪裡待過 · Where I have worked</p>
+            <h2 class="section-title text-3xl font-bold sm:text-4xl lg:text-5xl">工作經歷 / Experience</h2>
+          </div>
+
+          <div class="bi-rows">
+            {
+              experience.map((e) => (
+                <div class="bi-pair">
+                  <div class="card reveal">
+                    <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                      <h3 class="text-lg font-semibold text-body">{e.company.zh}</h3>
+                      <span class="font-mono text-sm text-highlight">{e.period}</span>
+                    </div>
+                    <p class="mt-1 font-medium text-highlight">{e.title.zh}</p>
+                    <p class="text-sm text-dimmed">
+                      {e.dept.zh} · {e.location.zh}
+                    </p>
+                    <ul class="mt-4 space-y-1.5">
+                      {e.bullets.map((b) => (
+                        <li class="flex gap-2 text-sm leading-relaxed text-muted">
+                          <span class="text-accent" aria-hidden="true">
+                            ▸
+                          </span>
+                          <span>{b.zh}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div class="card reveal" style="transition-delay:.06s">
+                    <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                      <h3 class="text-lg font-semibold text-body">{e.company.en}</h3>
+                      <span class="font-mono text-sm text-highlight">{e.period}</span>
+                    </div>
+                    <p class="mt-1 font-medium text-highlight">{e.title.en}</p>
+                    <p class="text-sm text-dimmed">
+                      {e.dept.en} · {e.location.en}
+                    </p>
+                    <ul class="mt-4 space-y-1.5">
+                      {e.bullets.map((b) => (
+                        <li class="flex gap-2 text-sm leading-relaxed text-muted">
+                          <span class="text-accent" aria-hidden="true">
+                            ▸
+                          </span>
+                          <span>{b.en}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= EDUCATION ================= -->
+      <section id="education" class="py-20">
+        <div class="container-x">
+          <div class="bi-head reveal">
+            <p class="eyebrow mb-3">讀過哪裡 · Where I studied</p>
+            <h2 class="section-title text-3xl font-bold sm:text-4xl lg:text-5xl">學歷 / Education</h2>
+          </div>
+
+          <div class="bi-rows">
+            {
+              education.map((e) => (
+                <div class="bi-pair">
+                  <div class="card reveal">
+                    <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                      <h3 class="text-lg font-semibold text-body">{e.school.zh}</h3>
+                      <span class="font-mono text-sm text-highlight">{e.period}</span>
+                    </div>
+                    <p class="mt-1 font-medium text-highlight">{e.degree.zh}</p>
+                    {e.thesis && (
+                      <div class="mt-3 rounded-lg border border-[var(--border)] bg-[var(--bg-input)] p-4">
+                        <p class="text-[11px] font-semibold uppercase tracking-wider text-accent">
+                          碩士論文 · MSc Thesis
+                        </p>
+                        <p class="mt-1 font-medium text-body">{e.thesis.title.zh}</p>
+                        <p class="mt-1.5 text-xs text-muted">
+                          {e.thesis.advisor.zh} · {e.thesis.oral.zh}
+                        </p>
+                        <a
+                          href={e.thesis.url}
+                          target="_blank"
+                          rel="noopener"
+                          class="mt-1 inline-block break-all text-xs text-highlight underline underline-offset-2"
+                        >
+                          🔗 {e.thesis.url}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+
+                  <div class="card reveal" style="transition-delay:.06s">
+                    <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                      <h3 class="text-lg font-semibold text-body">{e.school.en}</h3>
+                      <span class="font-mono text-sm text-highlight">{e.period}</span>
+                    </div>
+                    <p class="mt-1 font-medium text-highlight">{e.degree.en}</p>
+                    {e.thesis && (
+                      <div class="mt-3 rounded-lg border border-[var(--border)] bg-[var(--bg-input)] p-4">
+                        <p class="text-[11px] font-semibold uppercase tracking-wider text-accent">
+                          MSc Thesis
+                        </p>
+                        <p class="mt-1 font-medium text-body">{e.thesis.title.en}</p>
+                        <p class="mt-1.5 text-xs text-muted">
+                          {e.thesis.advisor.en} · {e.thesis.oral.en}
+                        </p>
+                        <a
+                          href={e.thesis.url}
+                          target="_blank"
+                          rel="noopener"
+                          class="mt-1 inline-block break-all text-xs text-highlight underline underline-offset-2"
+                        >
+                          🔗 {e.thesis.url}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PROJECTS ================= -->
+      <section id="projects" class="py-20">
+        <div class="container-x">
+          <div class="bi-head reveal">
+            <p class="eyebrow mb-3">做過什麼 · What I built</p>
+            <h2 class="section-title text-3xl font-bold sm:text-4xl lg:text-5xl">專案 / Projects</h2>
+          </div>
+
+          <div class="bi-rows">
+            {
+              works.map((w) => (
+                <div class="bi-pair">
+                  <a
+                    class="project-card reveal has-bg"
+                    href={`/zh/works/${w.key}/`}
+                    aria-label={`${w.zh!.data.title} — 專案詳細頁`}
+                  >
+                    <div class="project-card-inner has-bg-img">
+                      <div class="card-bg-img" aria-hidden="true">
+                        <img src="/images/projects/sic-yolo-detection.svg" alt="" loading="lazy" />
+                      </div>
+                      <div class="relative z-10 flex flex-1 flex-col p-5">
+                        <div class="mb-3 flex items-start justify-between gap-3">
+                          <p class="text-xs font-bold uppercase leading-tight tracking-widest text-highlight">
+                            專案 · Project
+                          </p>
+                          {w.zh!.data.period && (
+                            <span class="shrink-0 font-mono text-[11px] text-dimmed">
+                              {w.zh!.data.period}
+                            </span>
+                          )}
+                        </div>
+                        <h3 class="project-title mb-2 text-lg font-bold leading-snug">
+                          {w.zh!.data.title}
+                        </h3>
+                        <p class="card-desc mb-4 flex-1 text-sm leading-relaxed">{w.zh!.data.summary}</p>
+                        <div class="flex flex-wrap gap-1.5">
+                          {w.zh!.data.tech.slice(0, 4).map((t) => (
+                            <span class="tag">{t}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <div class="project-footer relative z-10">
+                        <span class="view-hint">
+                          <span class="view-hint-text">專案詳細頁</span>
+                          <svg class="view-hint-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+                            ></path>
+                          </svg>
+                        </span>
+                      </div>
+                    </div>
+                  </a>
+
+                  <a
+                    class="project-card reveal has-bg"
+                    href={`/en/works/${w.key}/`}
+                    style="transition-delay:.06s"
+                    aria-label={`${w.en!.data.title} — project details`}
+                  >
+                    <div class="project-card-inner has-bg-img">
+                      <div class="card-bg-img" aria-hidden="true">
+                        <img src="/images/projects/sic-yolo-detection.svg" alt="" loading="lazy" />
+                      </div>
+                      <div class="relative z-10 flex flex-1 flex-col p-5">
+                        <div class="mb-3 flex items-start justify-between gap-3">
+                          <p class="text-xs font-bold uppercase leading-tight tracking-widest text-highlight">
+                            Project
+                          </p>
+                          {w.en!.data.period && (
+                            <span class="shrink-0 font-mono text-[11px] text-dimmed">
+                              {w.en!.data.period}
+                            </span>
+                          )}
+                        </div>
+                        <h3 class="project-title mb-2 text-lg font-bold leading-snug">
+                          {w.en!.data.title}
+                        </h3>
+                        <p class="card-desc mb-4 flex-1 text-sm leading-relaxed">{w.en!.data.summary}</p>
+                        <div class="flex flex-wrap gap-1.5">
+                          {w.en!.data.tech.slice(0, 4).map((t) => (
+                            <span class="tag">{t}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <div class="project-footer relative z-10">
+                        <span class="view-hint">
+                          <span class="view-hint-text">Project details</span>
+                          <svg class="view-hint-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+                            ></path>
+                          </svg>
+                        </span>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= CERTIFICATIONS ================= -->
+      <section id="certifications" class="bg-[var(--bg-section)] py-20">
+        <div class="container-x">
+          <div class="bi-head reveal">
+            <p class="eyebrow mb-3">資格與進修 · Credentials</p>
+            <h2 class="section-title text-3xl font-bold sm:text-4xl lg:text-5xl">證照 / Certifications</h2>
+          </div>
+
+          <div class="bi-rows">
+            {
+              certifications.map((c) => (
+                <div class="bi-pair">
+                  <div class="card reveal flex items-start gap-3">
+                    <span class="text-xl leading-none" aria-hidden="true">
+                      {c.icon}
+                    </span>
+                    <div class="min-w-0">
+                      <h3 class="text-[15px] font-semibold text-body">{c.name.zh}</h3>
+                      <p class="mt-1 text-sm text-muted">{c.issuer.zh}</p>
+                      {c.date && <p class="font-mono text-xs text-accent">{c.date}</p>}
+                    </div>
+                  </div>
+                  <div class="card reveal flex items-start gap-3" style="transition-delay:.06s">
+                    <span class="text-xl leading-none" aria-hidden="true">
+                      {c.icon}
+                    </span>
+                    <div class="min-w-0">
+                      <h3 class="text-[15px] font-semibold text-body">{c.name.en}</h3>
+                      <p class="mt-1 text-sm text-muted">{c.issuer.en}</p>
+                      {c.date && <p class="font-mono text-xs text-accent">{c.date}</p>}
+                    </div>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= SKILLS ================= -->
+      <section id="skills" class="py-20">
+        <div class="container-x">
+          <div class="bi-head reveal">
+            <p class="eyebrow mb-3">工具與技術 · Tools &amp; technologies</p>
+            <h2 class="section-title text-3xl font-bold sm:text-4xl lg:text-5xl">技能 / Skills</h2>
+          </div>
+
+          <div class="bi-rows">
+            {
+              skillGroups.map((g) => (
+                <div class="bi-pair">
+                  <div class="card reveal">
+                    <h3 class="mb-4 text-sm font-bold uppercase tracking-widest text-accent">{g.zh}</h3>
+                    <div class="flex flex-wrap gap-1.5">
+                      {g.items.map((i) => (
+                        <span class="tag">{i.zh}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div class="card reveal" style="transition-delay:.06s">
+                    <h3 class="mb-4 text-sm font-bold uppercase tracking-widest text-accent">{g.en}</h3>
+                    <div class="flex flex-wrap gap-1.5">
+                      {g.items.map((i) => (
+                        <span class="tag">{i.en}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )              )
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= NOTES ================= -->
+      {
+        notes.length > 0 && (
+          <section id="notes" class="bg-[var(--bg-section)] py-20">
+            <div class="container-x">
+              <div class="bi-head reveal">
+                <p class="eyebrow mb-3">心得與筆記 · Notes and write-ups</p>
+                <h2 class="section-title text-3xl font-bold sm:text-4xl lg:text-5xl">技術筆記 / Notes</h2>
+              </div>
+
+              <div class="bi-rows">
+                {notes.map((n) => (
+                  <div class="bi-pair">
+                    <a
+                      class="card reveal block transition-transform hover:-translate-y-1"
+                      href={`/zh/notes/${n.key}/`}
+                    >
+                      <div class="flex flex-wrap items-baseline justify-between gap-2">
+                        <h3 class="text-lg font-medium text-body">{n.zh!.data.title}</h3>
+                        <time class="font-mono text-xs text-accent">
+                          {n.zh!.data.pubDate.toISOString().slice(0, 10)}
+                        </time>
+                      </div>
+                      <p class="mt-2 text-sm leading-relaxed text-muted">{n.zh!.data.description}</p>
+                    </a>
+                    <a
+                      class="card reveal block transition-transform hover:-translate-y-1"
+                      href={`/en/notes/${n.key}/`}
+                      style="transition-delay:.06s"
+                    >
+                      <div class="flex flex-wrap items-baseline justify-between gap-2">
+                        <h3 class="text-lg font-medium text-body">{n.en!.data.title}</h3>
+                        <time class="font-mono text-xs text-accent">
+                          {n.en!.data.pubDate.toISOString().slice(0, 10)}
+                        </time>
+                      </div>
+                      <p class="mt-2 text-sm leading-relaxed text-muted">{n.en!.data.description}</p>
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )
+      }
+
+      <!-- ================= CONTACT ================= -->
+      <section id="contact" class="py-20">
+        <div class="container-x">
+          <div class="bi-head reveal">
+            <p class="eyebrow mb-3">取得聯絡方式 · Reach me</p>
+            <h2 class="section-title text-3xl font-bold sm:text-4xl lg:text-5xl">聯絡 / Contact</h2>
+          </div>
+
+          <div class="bi-rows">
+            <div class="bi-pair">
+              <div class="card reveal flex items-center gap-4">
+                <div class="svc-icon-box">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    class="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 21s-7-5.3-7-11a7 7 0 1 1 14 0c0 5.7-7 11-7 11z"></path>
+                    <circle cx="12" cy="10" r="2.5"></circle>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-body">地點 / Location</h3>
+                  <p class="text-sm text-muted">
+                    {contact.city.zh} · {contact.availability.zh}
+                  </p>
+                  <p class="text-sm text-dimmed">
+                    {contact.city.en} · {contact.availability.en}
+                  </p>
+                </div>
+              </div>
+              <div class="card reveal p-6 text-center" style="transition-delay:.06s">
+                <p class="text-sm leading-relaxed text-muted">
+                  本站刻意不在頁面上公開電話與信箱。請填寫聯絡表單，我會親自回覆並附上履歷。
+                </p>
+                <p class="mt-2 text-sm leading-relaxed text-dimmed">
+                  Phone and email are deliberately not published. Use the form and I will reply
+                  personally with a CV attached.
+                </p>
+                <div class="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
+                  <a href="/zh/contact/" class="btn-primary text-center">聯絡表單</a>
+                  <a href="/en/contact/" class="btn-primary text-center">Contact form</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="bi-pair">
+              <div class="card reveal flex items-center gap-4">
+                <div class="svc-icon-box">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    class="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 5h16v14H4z"></path>
+                    <path d="M8 10h8M8 14h5"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-body">A4 列印履歷 / Printable CV</h3>
+                  <p class="text-sm text-muted">唯一公開完整聯絡資訊的頁面（noindex）</p>
+                  <p class="text-sm text-dimmed">
+                    The only page with full contact details (noindex)
+                  </p>
+                </div>
+              </div>
+              <div class="card reveal p-6 text-center" style="transition-delay:.06s">
+                <div class="flex flex-col justify-center gap-3 sm:flex-row">
+                  <a href="/zh/resume/" class="btn-secondary text-center">中文 A4 履歷</a>
+                  <a href="/en/resume/" class="btn-secondary text-center">English résumé</a>
+                </div>
+                <p class="pii-note mt-5">
+                  🔒 手機、信箱與完整地址請由 A4 列印履歷取得 · Phone, email and full address are
+                  available from the printable CV
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer-shell">
+      <div class="container-x px-5 py-8">
+        <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
+          <p class="text-sm text-dimmed">
+            {identity.name.zh} · {identity.name.en} — SiC 第三代半導體智慧製造 / Smart
+            Manufacturing for SiC Power Devices
+          </p>
+          <div class="flex items-center gap-5 text-sm">
+            <a href="/zh/" class="text-dimmed hover:text-[var(--accent)]">中文版</a>
+            <a href="/en/" class="text-dimmed hover:text-[var(--accent)]">English</a>
+          </div>
+        </div>
+        <p class="mt-4 text-center text-xs text-dimmer">
+          純靜態網站，架設於 Cloudflare Workers，無追蹤 cookie。 A fully static site on Cloudflare
+          Workers. No tracking cookies. 2026
+        </p>
+      </div>
+    </footer>
+
+    <style is:global>
+      /* ---- 中英文並列版面 ---- */
+      section[id] {
+        scroll-margin-top: 5rem;
+      }
+      .bi-head {
+        margin-bottom: 2.75rem;
+        text-align: center;
+      }
+      .bi-rows {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .bi-pair {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        align-items: stretch;
+      }
+      .bi-pair > * {
+        height: 100%;
+        min-width: 0;
+      }
+      @media (min-width: 900px) {
+        .bi-pair {
+          grid-template-columns: 1fr 1fr;
+        }
+        /* 左欄（中文）與右欄（英文）之間的分隔線 */
+        .bi-pair > :first-child {
+          border-right: 1px solid var(--border);
+          padding-right: 1.5rem;
+        }
+        .bi-pair > :last-child {
+          padding-left: 1.5rem;
+        }
+      }
+
+      /* 主題切換（與 Header.astro 共用外觀） */
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 64px;
+        height: 34px;
+        flex-shrink: 0;
+        cursor: pointer;
+        transform: scale(0.75);
+        filter: saturate(1.25) brightness(1.33);
+        transition: filter 0.5s ease-in-out;
+      }
+      .switch:hover,
+      .switch:focus-within {
+        filter: saturate(1.5) brightness(1.5);
+      }
+      .switch:focus-within .slider {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        inset: 0;
+        cursor: pointer;
+        background-color: var(--bg-surface);
+        transition: 0.4s;
+        border-radius: 30px;
+      }
+      .slider::before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: var(--text-muted);
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+      .switch .sun svg {
+        position: absolute;
+        top: 6px;
+        left: 36px;
+        z-index: 1;
+        width: 24px;
+        height: 24px;
+        animation: sw-rotate 30s linear infinite;
+      }
+      .switch .moon svg {
+        fill: var(--text-muted);
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        z-index: 1;
+        width: 24px;
+        height: 24px;
+        animation: sw-tilt 5s linear infinite;
+      }
+      .switch .sun {
+        display: block;
+      }
+      .switch .moon {
+        display: none;
+      }
+      .switch:has(input:checked) .sun {
+        display: none;
+      }
+      .switch:has(input:checked) .moon {
+        display: block;
+      }
+      .switch input:checked + .slider {
+        background-color: var(--bg-card);
+      }
+      .switch input:checked + .slider::before {
+        transform: translateX(30px);
+        background-color: var(--accent-blue);
+      }
+      @keyframes sw-rotate {
+        0% {
+          transform: rotate(0);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes sw-tilt {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        25% {
+          transform: rotate(-10deg);
+        }
+        75% {
+          transform: rotate(10deg);
+        }
+      }
+    </style>
+
+    <script is:inline>
+      (function () {
+        var root = document.documentElement;
+        var key = root.dataset.themeKey || "portfolio-theme";
+        var box = document.getElementById("theme-checkbox");
+        var meta = document.getElementById("meta-theme-color");
+
+        function apply(theme) {
+          if (theme === "light") {
+            root.setAttribute("data-theme", "light");
+            if (box) box.checked = true;
+            if (meta) meta.setAttribute("content", "#f8fafc");
+          } else {
+            root.removeAttribute("data-theme");
+            if (box) box.checked = false;
+            if (meta) meta.setAttribute("content", "#020617");
+          }
+        }
+        try {
+          apply(localStorage.getItem(key) || "dark");
+        } catch (e) {}
+        if (box) {
+          box.addEventListener("change", function () {
+            var t = box.checked ? "light" : "dark";
+            try {
+              localStorage.setItem(key, t);
+            } catch (e) {}
+            apply(t);
+          });
+        }
+
+        if ("IntersectionObserver" in window) {
+          var ro = new IntersectionObserver(
+            function (entries) {
+              entries.forEach(function (en) {
+                if (en.isIntersecting) {
+                  en.target.classList.add("visible");
+                  ro.unobserve(en.target);
+                }
+              });
+            },
+            { threshold: 0.08, rootMargin: "0px 0px -6% 0px" }
+          );
+          document.querySelectorAll(".reveal").forEach(function (el) {
+            ro.observe(el);
+          });
+        } else {
+          document.querySelectorAll(".reveal").forEach(function (el) {
+            el.classList.add("visible");
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

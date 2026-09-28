@@ -1,0 +1,17 @@
+---
+/**
+ * 個資遮罩元件：螢幕上以 `color: transparent` 遮住，列印時由
+ * `@media print` 強制還原。
+ *
+ * 這裡刻意「不」附帶 reveal 腳本 —— 該元件在列印頁會被重複使用 5 次，
+ * 每次注入一份 inline script 就是 2KB 的重複。解除遮罩的邏輯集中在
+ * `ResumeLayout.astro` 的單一 inline script 中，由 `#reveal` 按鈕與
+ * `sessionStorage` 觸發。
+ */
+interface Props {
+  value: string;
+}
+const { value } = Astro.props;
+---
+
+<span class="pii font-medium" data-pii title="點擊顯示">{value}</span>

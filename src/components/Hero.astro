@@ -1,0 +1,516 @@
+---
+import type { Locale } from "../lib/i18n";
+import { identity } from "../data/resume";
+import { contact } from "../data/contact";
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props as Props;
+
+const slides =
+  locale === "zh"
+    ? [
+        {
+          image: "/images/projects/sic-yolo-detection.svg",
+          title: "SiC 晶圓表面 YOLO 缺陷檢測",
+          kicker: "逢甲資訊電機 碩士論文",
+          alt: "SiC 晶圓 YOLO 缺陷檢測專案海報"
+        },
+        {
+          image: "/images/projects/sic-pilot-factory.svg",
+          title: "SiC 第三代半導體試驗工廠",
+          kicker: "廠務 / 智慧製造",
+          alt: "SiC 試驗工廠建廠專案海報"
+        },
+        {
+          image: "/images/projects/comsol-thermal.svg",
+          title: "COMSOL 熱場模擬與散熱最佳化",
+          kicker: "模擬分析",
+          alt: "COMSOL 熱場模擬專案海報"
+        },
+        {
+          image: "/images/projects/jetson-edge-ai.svg",
+          title: "NVIDIA Jetson 邊緣 AI 應用",
+          kicker: "工業邊緣運算",
+          alt: "Jetson 邊緣 AI 專案海報"
+        }
+      ]
+    : [
+        {
+          image: "/images/projects/sic-yolo-detection.svg",
+          title: "SiC Wafer Surface YOLO Detection",
+          kicker: "MSc Thesis, Feng Chia",
+          alt: "SiC wafer YOLO defect detection poster"
+        },
+        {
+          image: "/images/projects/sic-pilot-factory.svg",
+          title: "SiC Pilot Line — Smart Factory",
+          kicker: "Facilities / Smart Manufacturing",
+          alt: "SiC pilot factory poster"
+        },
+        {
+          image: "/images/projects/comsol-thermal.svg",
+          title: "COMSOL Thermal Field Simulation",
+          kicker: "Simulation",
+          alt: "COMSOL thermal simulation poster"
+        },
+        {
+          image: "/images/projects/jetson-edge-ai.svg",
+          title: "NVIDIA Jetson Edge AI",
+          kicker: "Industrial Edge Computing",
+          alt: "Jetson edge AI poster"
+        }
+      ];
+
+const badgePaths = [
+  "M6.75 7.5 10 9.75 6.75 12m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z",
+  "M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z",
+  "M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z",
+  "M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
+];
+
+const socials = [
+  { key: "github", label: "GitHub", d: "M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" },
+  { key: "linkedin", label: "LinkedIn", d: "M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124zM7.119 20.452H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z" }
+];
+const socialHref = (k: string) => (contact.links[k as "github" | "linkedin"] === "TODO" ? "#projects" : contact.links[k as "github" | "linkedin"]);
+---
+
+<section id="home" class="relative flex min-h-screen items-center overflow-hidden">
+  <div class="spotlight-bg" aria-hidden="true">
+    <div class="spotlight spotlight-1"></div>
+    <div class="spotlight spotlight-2"></div>
+    <div class="spotlight spotlight-3"></div>
+  </div>
+  <div
+    class="animate-pulse-slow pointer-events-none absolute right-1/4 top-1/4 h-96 w-96 rounded-full opacity-20"
+    style="background: radial-gradient(circle, rgba(99,102,241,0.4) 0%, transparent 70%); filter: blur(40px); z-index: 1;"
+    aria-hidden="true"
+  >
+  </div>
+  <div
+    class="animate-pulse-slow pointer-events-none absolute bottom-1/4 left-1/4 h-96 w-96 rounded-full opacity-[0.15]"
+    style="background: radial-gradient(circle, rgba(14,165,233,0.4) 0%, transparent 70%); filter: blur(40px); z-index: 1; animation-delay: 2s;"
+    aria-hidden="true"
+  >
+  </div>
+
+  <div class="container-x relative z-10 py-32 lg:py-0">
+    <div id="hero-canvas-wrapper">
+      <canvas id="hero-canvas"></canvas>
+    </div>
+
+    <div
+      class="grid min-h-screen grid-cols-1 items-center gap-12 py-32 lg:min-h-0 lg:grid-cols-2 lg:gap-16 lg:py-32"
+    >
+      <div class="order-2 relative space-y-6 lg:order-1">
+        <p class="eyebrow reveal">
+          {locale === "zh" ? "歡迎來到我的個人檔案" : "Welcome to my portfolio"}
+        </p>
+
+        <div class="reveal text-backdrop" style="transition-delay:.1s">
+          <h1 class="font-bold leading-tight" style="font-size:clamp(2.5rem,5vw,4.5rem)">
+            {locale === "zh" ? "哈囉，我是" : "Hi, I'm"}<br />
+            <span class="gradient-text">{identity.name[locale]}</span>
+          </h1>
+          <h2 class="mt-3 font-light text-muted" style="font-size:clamp(1rem,2.2vw,1.5rem)">
+            {identity.currentTitle[locale]}<span class="text-highlight">&</span>{locale === "zh"
+              ? "SiC 半導體製造"
+              : "SiC Manufacturing"}
+          </h2>
+        </div>
+
+        <p
+          class="reveal text-backdrop max-w-lg text-base leading-relaxed text-muted"
+          style="transition-delay:.2s"
+        >
+          {
+            locale === "zh"
+              ? "生物學訓練出身，卻在紡織與化學纖維的產線上待了 12 年。30 歲跨域攻讀資訊電機碩士，把深度學習帶回工廠——讓碳化矽晶圓的品質管制從人工目視，變成 YOLO 自動檢測。"
+              : "Trained as a biologist, then spent 12 years on production lines in textile and chemical-fibre manufacturing. At 30 I switched fields to complete an MSc in Information & Electrical Engineering, bringing deep learning back to the factory floor."
+          }
+        </p>
+
+        <div class="reveal flex flex-col gap-4 sm:flex-row" style="transition-delay:.3s">
+          <a href={`/${locale}/contact/`} class="btn-primary text-center">
+            {locale === "zh" ? "與我聯絡" : "Get In Touch"}
+          </a>
+          <a href={`/${locale}/resume/`} class="btn-secondary text-center">
+            {locale === "zh" ? "下載 A4 履歷" : "Download CV"}
+          </a>
+        </div>
+
+        <div class="reveal flex items-center gap-6" style="transition-delay:.4s">
+          {
+            socials.map((s) => (
+              <a href={socialHref(s.key)} class="hero-social-link" aria-label={s.label}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d={s.d} />
+                </svg>
+              </a>
+            ))
+          }
+        </div>
+
+        <div class="portrait-peek-wrapper reveal" aria-hidden="true" style="transition-delay:.65s">
+          <img
+            src="/images/personal/portrait.svg"
+            alt="Portrait illustration"
+            class="portrait-peek-img"
+            loading="lazy"
+            width="280"
+            height="350"
+          />
+        </div>
+      </div>
+
+      <div
+        class="order-1 flex justify-center lg:order-2 lg:justify-end reveal"
+        style="transition-delay:.2s"
+      >
+        <div
+          class="project-frame-outer project-frame-sizer w-72 h-72 sm:w-96 sm:h-96 lg:w-[450px] lg:h-[450px]"
+        >
+          <article class="project-frame" id="project-frame" data-carousel>
+            <div class="pf-header" id="project-frame-header">              <h2 class="pf-title">{locale === "zh" ? "精選專案" : "Featured Projects"}</h2>
+              <div class="pf-btn-group">
+                <button
+                  type="button"
+                  id="pf-fullscreen-btn"
+                  class="pf-btn"
+                  style="--glow-color:rgba(14,165,233,0.8)"
+                  aria-label="Fullscreen"
+                >
+                  <svg viewBox="0 0 512 512" class="pf-btn-icon" fill="currentColor">
+                    <path
+                      d="M344 0H488c13.3 0 24 10.7 24 24V168c0 9.7-5.8 18.5-14.8 22.2s-19.3 1.7-26.2-5.2l-39-39-87 87c-9.4 9.4-24.6 9.4-33.9 0l-32-32c-9.4-9.4-9.4-24.6 0-33.9l87-87L327 41c-6.9-6.9-8.9-17.2-5.2-26.2S334.3 0 344 0zM168 512H24c-13.3 0-24-10.7-24-24V344c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2l39 39 87-87c9.4-9.4 24.6-9.4 33.9 0l32 32c9.4 9.4 9.4 24.6 0 33.9l-87 87 39 39c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8z"
+                    ></path>
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  id="pf-close-btn"
+                  class="pf-btn"
+                  style="--glow-color:rgba(99,102,241,0.8)"
+                  aria-label="Minimize"
+                >
+                  <svg viewBox="0 0 384 512" class="pf-btn-icon" fill="currentColor">
+                    <path
+                      d="M376.6 84.5c11.3-13.6 9.5-33.8-4.1-45.1s-33.8-9.5-45.1 4.1L192 206 56.6 43.5C45.3 29.9 25.1 28.1 11.5 39.4S-3.9 70.9 7.4 84.5L150.3 256 7.4 427.5c-11.3 13.6-9.5 33.8 4.1 45.1s33.8 9.5 45.1-4.1L192 306 327.4 468.5c11.3 13.6 31.5 15.4 45.1 4.1s15.4-31.5 4.1-45.1L233.7 256 376.6 84.5z"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="pf-body">
+              <div class="relative h-full w-full">
+                {
+                  slides.map((s, i) => (
+                    <div
+                      class="hero-slide"
+                      data-index={i}
+                      style={`transform:translateX(${i * 100}%);opacity:${i === 0 ? 1 : 0}`}
+                    >
+                      <img src={s.image} alt={s.alt} loading="lazy" width="450" height="450" />
+                      <div class="slide-caption">
+                        <div>
+                          <p>{s.title}</p>
+                          <p>{s.kicker}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                }
+                <div class="absolute left-0 right-0 top-2 z-30 flex justify-center gap-1.5" data-dots>
+                  {
+                    slides.map((_, i) => (
+                      <button
+                        class="slider-dot"
+                        data-dot={i}
+                        style={`background:${i === 0 ? "#6366f1" : "rgba(255,255,255,0.25)"};width:${i === 0 ? "1.25rem" : "6px"}`}
+                        aria-label={`${locale === "zh" ? "前往第" : "Go to slide "}${i + 1}${locale === "zh" ? "張" : ""}`}
+                      />
+                    ))
+                  }
+                </div>
+              </div>
+
+              <button
+                class="slider-nav-btn slider-nav-prev"
+                aria-label={locale === "zh" ? "上一個專案" : "Previous project"}
+                data-prev
+              >
+                <svg
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  class="slider-nav-icon"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 19l-7-7 7-7"
+                  ></path>
+                </svg>
+              </button>
+              <button
+                class="slider-nav-btn slider-nav-next"
+                aria-label={locale === "zh" ? "下一個專案" : "Next project"}
+                data-next
+              >
+                <svg
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  class="slider-nav-icon"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5l7 7-7 7"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+
+            <div class="pf-badge" aria-hidden="true">
+              {
+                badgePaths.map((d, i) => (
+                  <div
+                    class="hero-badge-icon"
+                    data-badge={i}
+                    style={`opacity:${i === 0 ? 1 : 0};transform:scale(${i === 0 ? 1 : 0.4})`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke-width="1.5"
+                      stroke="currentColor"
+                      class="h-6 w-6 text-highlight"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" d={d} />
+                    </svg>
+                  </div>
+                ))
+              }
+            </div>
+
+            <div class="pf-counter">
+              <span class="slider-counter font-mono text-sm font-bold" style="color:#8fa8c8"
+                ><span data-current>1</span> / {slides.length}</span
+              >
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="pf-overlay" aria-hidden="true"></div>
+
+<div class="sd" aria-hidden="true">
+  <div class="sd-pill sd-l"></div>
+  <div class="sd-pill sd-r"></div>
+</div>
+
+<script is:inline>
+  (function () {
+    var root = document.getElementById("project-frame");
+    if (root) {
+      var slides = [].slice.call(root.querySelectorAll("[data-slide], .hero-slide"));
+      var dots = [].slice.call(root.querySelectorAll("[data-dot]"));
+      var badges = [].slice.call(root.querySelectorAll("[data-badge]"));
+      var current = document.querySelector("[data-current]");
+      var i = 0;
+      var timer = null;
+
+      function show(n) {
+        i = (n + slides.length) % slides.length;
+        slides.forEach(function (s, k) {
+          s.style.transform = "translateX(" + (k - i) * 100 + "%)";
+          s.style.opacity = k === i ? "1" : "0";
+        });
+        dots.forEach(function (d, k) {
+          d.style.background = k === i ? "#6366f1" : "rgba(255,255,255,0.25)";
+          d.style.width = k === i ? "1.25rem" : "6px";
+        });
+        badges.forEach(function (b, k) {
+          b.style.opacity = k === i ? "1" : "0";
+          b.style.transform = "scale(" + (k === i ? 1 : 0.4) + ")";
+        });
+        if (current) current.textContent = String(i + 1);
+      }
+      function play() {
+        stop();
+        timer = setInterval(function () {
+          show(i + 1);
+        }, 6000);
+      }
+      function stop() {
+        if (timer) clearInterval(timer);
+        timer = null;
+      }
+
+      show(0);
+      play();
+
+      root.querySelector("[data-next]")?.addEventListener("click", function () {
+        show(i + 1);
+        play();
+      });
+      root.querySelector("[data-prev]")?.addEventListener("click", function () {
+        show(i - 1);
+        play();
+      });
+      dots.forEach(function (d, k) {
+        d.addEventListener("click", function () {
+          show(k);
+          play();
+        });
+      });
+      root.addEventListener("mouseenter", stop);
+      root.addEventListener("mouseleave", play);
+
+      // fullscreen / minimize
+      var frame = root;
+      var overlay = document.getElementById("pf-overlay");
+      var fsBtn = document.getElementById("pf-fullscreen-btn");
+      var closeBtn = document.getElementById("pf-close-btn");
+      function setFull(on) {
+        frame.classList.toggle("pf-fullscreen", on);
+        if (overlay) {
+          overlay.classList.toggle("pf-overlay-active", on);
+          overlay.setAttribute("aria-hidden", on ? "false" : "true");
+        }
+        document.body.style.overflow = on ? "hidden" : "";
+      }
+      fsBtn?.addEventListener("click", function () {
+        setFull(true);
+      });
+      closeBtn?.addEventListener("click", function () {
+        setFull(false);
+      });
+      overlay?.addEventListener("click", function () {
+        setFull(false);
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") setFull(false);
+      });
+    }
+
+    // scroll-down pill
+    if ("IntersectionObserver" in window) {
+      var sdo = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (en) {
+            if (en.isIntersecting) {
+              en.target.classList.add("visible");
+              sdo.disconnect();
+            }
+          });
+        },
+        { threshold: 0.5 }
+      );
+      document.querySelectorAll(".sd").forEach(function (e) {
+        sdo.observe(e);
+      });
+    } else {
+      document.querySelectorAll(".sd").forEach(function (e) {
+        e.classList.add("visible");
+      });
+    }
+
+    // hero particle canvas
+    var canvas = document.getElementById("hero-canvas");
+    if (canvas && canvas.getContext && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      var ctx = canvas.getContext("2d");
+      var host = canvas.parentElement;
+      var parts = [];
+      var raf = null;
+      function size() {
+        var r = host.getBoundingClientRect();
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.max(1, Math.floor(r.width * dpr));
+        canvas.height = Math.max(1, Math.floor(r.height * dpr));
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      function seed() {
+        var r = host.getBoundingClientRect();
+        var n = Math.min(70, Math.round((r.width * r.height) / 14000));
+        parts = [];
+        for (var k = 0; k < n; k++) {
+          parts.push({
+            x: Math.random() * r.width,
+            y: Math.random() * r.height,
+            vx: (Math.random() - 0.5) * 0.22,
+            vy: (Math.random() - 0.5) * 0.22,
+            r: Math.random() * 1.6 + 0.4
+          });
+        }
+      }
+      function draw() {
+        var r = host.getBoundingClientRect();
+        ctx.clearRect(0, 0, r.width, r.height);
+        for (var k = 0; k < parts.length; k++) {
+          var p = parts[k];
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.x < 0) p.x = r.width;
+          if (p.x > r.width) p.x = 0;
+          if (p.y < 0) p.y = r.height;
+          if (p.y > r.height) p.y = 0;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = k % 3 === 0 ? "rgba(14,165,233,0.55)" : "rgba(129,140,248,0.5)";
+          ctx.fill();
+        }
+        for (var a = 0; a < parts.length; a++) {
+          for (var b = a + 1; b < parts.length; b++) {
+            var dx = parts[a].x - parts[b].x;
+            var dy = parts[a].y - parts[b].y;
+            var d2 = dx * dx + dy * dy;
+            if (d2 < 12000) {
+              ctx.beginPath();
+              ctx.moveTo(parts[a].x, parts[a].y);
+              ctx.lineTo(parts[b].x, parts[b].y);
+              ctx.strokeStyle = "rgba(99,102,241," + (0.12 * (1 - d2 / 12000)).toFixed(3) + ")";
+              ctx.lineWidth = 1;
+              ctx.stroke();
+            }
+          }
+        }
+        raf = requestAnimationFrame(draw);
+      }
+      size();
+      seed();
+      draw();
+      var rt = null;
+      window.addEventListener("resize", function () {
+        clearTimeout(rt);
+        rt = setTimeout(function () {
+          size();
+          seed();
+        }, 200);
+      });
+      if ("IntersectionObserver" in window) {
+        var co = new IntersectionObserver(function (entries) {
+          entries.forEach(function (en) {
+            if (en.isIntersecting && !raf) {
+              raf = requestAnimationFrame(draw);
+            } else if (!en.isIntersecting && raf) {
+              cancelAnimationFrame(raf);
+              raf = null;
+            }
+          });
+        });
+        co.observe(host);
+      }
+    }
+  })();
+</script>

@@ -1,0 +1,387 @@
+﻿---
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import Hero from "../../components/Hero.astro";
+import Expertise from "../../components/Expertise.astro";
+import Skills from "../../components/Skills.astro";
+import Projects from "../../components/Projects.astro";
+import { identity, experience, education, certifications, keywords } from "../../data/resume";
+import { contact } from "../../data/contact";
+
+const locale = "zh" as const;
+const L = locale;
+const notes = (await getCollection("notes", (n) => n.data.lang === L && !n.data.draft)).sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()
+);
+
+const anchors = [
+  { href: "#about", label: "關於我" },
+  { href: "#expertise", label: "專業領域" },
+  { href: "#experience", label: "工作經歷" },
+  { href: "#education", label: "學歷" },
+  { href: "#projects", label: "專案" },
+  { href: "#certifications", label: "證照" },
+  { href: "#skills", label: "技能" },
+  { href: "#contact", label: "聯絡" },
+];
+
+const facts = [
+  { icon: "🧑‍💼", label: "職稱", value: identity.currentTitle.zh },
+  { icon: "📍", label: "地點", value: contact.city.zh },
+  { icon: "⏳", label: "經驗", value: "12 年製造業現場" },
+  { icon: "🧪", label: "領域", value: "SiC 第三代半導體" },
+];
+
+---
+
+<Base
+  locale={locale}
+  title={`${identity.name.zh}｜${identity.currentTitle.zh}｜SiC 半導體智慧製造`}
+  description={identity.summary.zh}
+  navAnchors={anchors}
+>
+  <Hero locale={locale} />
+
+  <!-- About -->
+  <section id="about" class="bg-[var(--bg-section)] py-24">
+    <div class="container-x">
+      <div class="mx-auto max-w-4xl">
+        <div class="reveal mb-12 text-center">
+          <p class="eyebrow mb-3">認識我</p>
+          <h2 class="section-title justify-center text-3xl font-bold sm:text-4xl lg:text-5xl">
+            關於我
+          </h2>
+        </div>
+
+        <div class="card reveal" style="transition-delay:.15s">
+          <p class="text-lg leading-relaxed text-muted">{identity.summary.zh}</p>
+          <p class="mt-4 text-lg leading-relaxed text-muted">「{identity.lead.zh}」</p>
+
+          <hr class="gradient-divider my-8" />
+
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {
+              facts.map((f) => (
+                <div class="flex items-start gap-4">
+                  <div class="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]">
+                    <span class="text-lg" aria-hidden="true">
+                      {f.icon}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 class="text-body font-semibold">{f.label}</h3>
+                    <p class="text-sm text-muted">{f.value}</p>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+
+          <div class="mt-8 flex flex-wrap gap-2">
+            {keywords.zh.slice(0, 10).map((k) => <span class="tag">{k}</span>)}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Expertise -->
+  <section id="expertise" class="py-24">
+    <div class="container-x">
+      <div class="reveal mb-12 text-center">
+        <p class="eyebrow mb-3">我怎麼做事</p>
+        <h2 class="section-title justify-center text-3xl font-bold sm:text-4xl">專業領域</h2>
+      </div>
+      <Expertise locale={locale} />
+    </div>
+  </section>
+
+  <!-- Experience -->
+  <section id="experience" class="bg-[var(--bg-section)] py-24">
+    <div class="container-x">
+      <div class="reveal mb-12 text-center">
+        <p class="eyebrow mb-3">在哪裡待過</p>
+        <h2 class="section-title justify-center text-3xl font-bold sm:text-4xl">工作經歷</h2>
+      </div>
+      <div class="mx-auto max-w-4xl space-y-5">
+        {
+          experience.map((e) => (
+            <div class="card reveal">
+              <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                <h3 class="text-lg font-semibold text-body">{e.company.zh}</h3>
+                <span class="font-mono text-sm text-highlight">{e.period}</span>
+              </div>
+              <p class="mt-1 font-medium text-highlight">{e.title.zh}</p>
+              <p class="text-sm text-dimmed">
+                {e.dept.zh} · {e.location.zh}
+              </p>
+              <ul class="mt-4 space-y-1.5">
+                {e.bullets.map((b) => (
+                  <li class="flex gap-2 text-sm leading-relaxed text-muted">
+                    <span class="text-accent" aria-hidden="true">
+                      ▸
+                    </span>
+                    <span>{b.zh}</span>
+                  </li>
+                ))}
+              </ul>
+              {e.todo.length > 0 && (
+                <p class="mt-3 text-xs text-amber-500/70">✏️ TODO: {e.todo.join(" / ")}</p>
+              )}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Education -->
+  <section id="education" class="py-24">
+    <div class="container-x">
+      <div class="reveal mb-12 text-center">
+        <p class="eyebrow mb-3">讀過哪裡</p>
+        <h2 class="section-title justify-center text-3xl font-bold sm:text-4xl">學歷與論文</h2>
+      </div>
+      <div class="mx-auto max-w-4xl space-y-5">
+        {
+          education.map((e) => (
+            <div class="card reveal">
+              <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                <h3 class="text-lg font-semibold text-body">{e.school.zh}</h3>
+                <span class="font-mono text-sm text-highlight">{e.period}</span>
+              </div>
+              <p class="mt-1 font-medium text-highlight">{e.degree.zh}</p>
+              {e.thesis && (
+                <div class="mt-3 rounded-lg border border-[var(--border)] bg-[var(--bg-input)] p-4">
+                  <p class="text-[11px] font-semibold uppercase tracking-wider text-accent">
+                    碩士論文 · MSc Thesis
+                  </p>
+                  <p class="mt-1 font-medium text-body">{e.thesis.title.zh}</p>
+                  <p class="mt-1.5 text-xs text-muted">
+                    {e.thesis.advisor.zh} · {e.thesis.oral.zh}
+                  </p>
+                  <a
+                    href={e.thesis.url}
+                    target="_blank"
+                    rel="noopener"
+                    class="mt-1 inline-block break-all text-xs text-highlight underline underline-offset-2"
+                  >
+                    🔗 {e.thesis.url}
+                  </a>
+                </div>
+              )}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects -->
+  <section id="projects" class="py-24">
+    <div class="container-x">
+      <div class="reveal mb-12 text-center">
+        <p class="eyebrow mb-3">做過什麼</p>
+        <h2 class="section-title justify-center text-3xl font-bold sm:text-4xl lg:text-5xl">
+          精選專案
+        </h2>
+      </div>
+      <Projects locale={locale} />
+      <div class="reveal mt-8 text-center print-hide">
+        <a href={`/${locale}/works/`} class="btn-secondary">查看全部專案</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Certifications -->
+  <section id="certifications" class="bg-[var(--bg-section)] py-24">
+    <div class="container-x">
+      <div class="reveal mb-12 text-center">
+        <p class="eyebrow mb-3">資格與進修</p>
+        <h2 class="section-title justify-center text-3xl font-bold sm:text-4xl">證照與在職訓練</h2>
+      </div>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          certifications.map((c) => (
+            <div class="card reveal flex items-start gap-3">
+              <span class="text-xl leading-none" aria-hidden="true">
+                {c.icon}
+              </span>
+              <div class="min-w-0">
+                <h3 class="text-[15px] font-semibold text-body">{c.name.zh}</h3>
+                <p class="mt-1 text-sm text-muted">{c.issuer.zh}</p>
+                {c.date && <p class="font-mono text-xs text-accent">{c.date}</p>}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills -->
+  <section id="skills" class="py-24">
+    <div class="container-x">
+      <div class="reveal mb-12 text-center">
+        <p class="eyebrow mb-3">工具與技術</p>
+        <h2 class="section-title justify-center text-3xl font-bold sm:text-4xl lg:text-5xl">
+          技能關鍵字
+        </h2>
+      </div>
+      <Skills locale={locale} />
+    </div>
+  </section>
+
+  <!-- Notes -->
+  {
+    notes.length > 0 && (
+      <section id="notes" class="bg-[var(--bg-section)] py-24">
+        <div class="container-x">
+          <div class="reveal mb-12 text-center">
+            <p class="eyebrow mb-3">心得與筆記</p>
+            <h2 class="section-title justify-center text-3xl font-bold sm:text-4xl">技術筆記</h2>
+          </div>
+          <div class="mx-auto max-w-4xl space-y-4">
+            {notes.slice(0, 3).map((n) => (
+              <a
+                href={`/${locale}/notes/${n.id.replace(/-(zh|en)$/, "")}/`}
+                class="card reveal block transition-transform hover:-translate-y-1"
+              >
+                <div class="flex flex-wrap items-baseline justify-between gap-2">
+                  <h3 class="text-lg font-medium text-body">{n.data.title}</h3>
+                  <time class="font-mono text-xs text-accent">
+                    {n.data.pubDate.toISOString().slice(0, 10)}
+                  </time>
+                </div>
+                <p class="mt-2 text-sm leading-relaxed text-muted">{n.data.description}</p>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- Contact -->
+  <section id="contact" class="py-24">
+    <div class="container-x">
+      <div class="reveal mb-12 text-center">
+        <p class="eyebrow mb-3">取得聯絡方式</p>
+        <h2 class="section-title justify-center text-3xl font-bold sm:text-4xl lg:text-5xl">
+          聯絡我
+        </h2>
+      </div>
+
+      <div class="mx-auto grid max-w-5xl grid-cols-1 items-start gap-6 lg:grid-cols-2">
+        <div class="space-y-4">
+          <div class="card reveal flex items-center gap-4">
+            <div class="svc-icon-box">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                class="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 21s-7-5.3-7-11a7 7 0 1 1 14 0c0 5.7-7 11-7 11z"></path>
+                <circle cx="12" cy="10" r="2.5"></circle>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-body">地點</h3>
+              <p class="text-sm text-muted">{contact.city.zh} · {contact.availability.zh}</p>
+            </div>
+          </div>
+
+          <div class="card reveal flex items-center gap-4">
+            <div class="svc-icon-box">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                class="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+                <path d="m3 7 9 6 9-6"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-body">語言與溝通</h3>
+              <p class="text-sm text-muted">中文（母語）· 英文 TOEIC 825 · 9 年外銷經驗</p>
+            </div>
+          </div>
+
+          <div class="card reveal flex items-center gap-4">
+            <div class="svc-icon-box">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                class="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M4 5h16v14H4z"></path>
+                <path d="M8 10h8M8 14h5"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-body">線上履歷</h3>
+              <p class="text-sm text-muted">A4 可列印履歷，含完整學歷、經歷與發表論文</p>
+            </div>
+          </div>
+
+          <div class="card reveal">
+            <h3 class="text-sm font-semibold text-body">在其他地方找得到我</h3>
+            <div class="mt-3 flex items-center gap-4">
+              <a href="https://hdl.handle.net/11296/197078" target="_blank" rel="noopener" class="hero-social-link" aria-label="Thesis repository">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="22"
+                  height="22"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+              </a>
+              <a href={`/${locale}/works/`} class="hero-social-link" aria-label="Projects">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.8.1-.8.1-.8 1.2.1 1.9 1.2 1.9 1.2 1.1 1.9 2.8 1.4 3.5 1 .1-.8.4-1.4.8-1.7-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2 0-.4-.5-1.6.2-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.2 4.7 18.2 5 18.2 5c.7 1.6.2 2.8.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3z"></path>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="card reveal p-8 text-center">
+          <p class="text-lg leading-relaxed text-muted">
+            本站刻意不在頁面上公開電話與信箱。若你正在評估我的背景，請填寫聯絡表單，我會親自回覆並附上履歷。
+          </p>
+          <div class="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
+            <a href={`/${locale}/contact/`} class="btn-primary text-center">填寫聯絡表單</a>
+            <a href={`/${locale}/resume/`} class="btn-secondary text-center">直接看 A4 履歷</a>
+          </div>
+          <p class="pii-note mt-6">🔒 手機、信箱與完整地址請由 A4 列印履歷取得</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>

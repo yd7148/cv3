@@ -1,0 +1,183 @@
+---
+import { getCollection } from "astro:content";
+import type { Locale } from "../lib/i18n";
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props as Props;
+const L = locale;
+
+const works = (await getCollection("works", (w) => w.data.lang === L && w.data.featured)).sort(
+  (a, b) => a.data.order - b.data.order
+);
+
+const meta: Record<string, { cat: string; catZh: string; img: string; icon: string }> = {
+  "sic-wafer-yolo": {
+    cat: "thesis",
+    catZh: "學位論文",
+    img: "/images/projects/sic-yolo-detection.svg",
+    icon: "/images/icons/skills/yolo.svg"
+  },
+  "sic-pilot-fab": {
+    cat: "facilities",
+    catZh: "廠務與建廠",
+    img: "/images/projects/sic-pilot-factory.svg",
+    icon: "/images/icons/skills/mfg.svg"
+  },
+  "edge-ai-jetson": {
+    cat: "deployment",
+    catZh: "邊緣部署",
+    img: "/images/projects/jetson-edge-ai.svg",
+    icon: "/images/icons/skills/jetson.svg"
+  }
+};
+
+const cards = works.map((w) => {
+  const key = w.id.replace(/-(zh|en)$/, "");
+  const m = meta[key] ?? {
+    cat: "other",
+    catZh: "其他",
+    img: "/images/projects/comsol-thermal.svg",
+    icon: "/images/icons/skills/pe.svg"
+  };
+  return {
+    href: `/${L}/works/${key}/`,
+    cat: m.cat,
+    catLabel: locale === "zh" ? m.catZh : m.cat,
+    img: m.img,
+    icon: m.icon,
+    title: w.data.title,
+    summary: w.data.summary,
+    tech: w.data.tech.slice(0, 5),
+    period: w.data.period ?? ""
+  };
+});
+
+const filters =
+  locale === "zh"
+    ? [{ key: "all", label: "全部" }, ...Array.from(new Set(cards.map((c) => c.cat))).map((k) => ({
+        key: k,
+        label: cards.find((c) => c.cat === k)?.catLabel ?? k
+      }))]
+    : [{ key: "all", label: "All" }, ...Array.from(new Set(cards.map((c) => c.cat))).map((k) => ({
+        key: k,
+        label: k.charAt(0).toUpperCase() + k.slice(1)
+      }))];
+
+const count = (k: string) => (k === "all" ? cards.length : cards.filter((c) => c.cat === k).length);
+---
+
+<div class="mb-10 flex flex-wrap justify-center gap-2 reveal" style="transition-delay:.1s">
+  {
+    filters.map((f, i) => (
+      <button
+        class="filter-btn"
+        data-filter={f.key}
+        aria-pressed={i === 0 ? "true" : "false"}
+        data-projects-filter
+      >
+        {f.label}
+        <span class="filter-count">{count(f.key)}</span>
+      </button>
+    ))
+  }
+</div>
+
+<div id="projects-grid" class="mx-auto grid max-w-7xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+  {
+    cards.map((c, i) => (
+      <a
+        class="project-card reveal has-bg"
+        data-category={c.cat}
+        data-index={i}
+        style={`transition-delay:${(i * 0.07).toFixed(2)}s`}
+        href={c.href}
+        aria-label={`${c.title} — ${locale === "zh" ? "前往專案詳細頁" : "Open project details"}`}
+      >
+        <div class="float-icon-wrap" aria-hidden="true">
+          <img src={c.icon} alt="" class="float-icon" loading="lazy" width="44" height="44" />
+        </div>
+
+        <div class="project-card-inner has-bg-img">
+          <div class="card-bg-img" aria-hidden="true">
+            <img src={c.img} alt="" loading="lazy" width="600" height="400" />
+          </div>
+
+          <div class="relative z-10 flex flex-1 flex-col p-5">
+            <div class="mb-3 flex items-start justify-between gap-3">
+              <p class="text-xs font-bold uppercase leading-tight tracking-widest text-highlight">
+                {c.catLabel}
+              </p>
+              {c.period && (
+                <span class="shrink-0 font-mono text-[11px] text-dimmed">{c.period}</span>
+              )}
+            </div>
+            <h3 class="project-title mb-2 text-lg font-bold leading-snug">{c.title}</h3>
+            <p class="card-desc mb-4 flex-1 text-sm leading-relaxed text-muted">{c.summary}</p>
+            <div class="flex flex-wrap gap-1.5">
+              {c.tech.map((t) => (
+                <span class="tag">{t}</span>
+              ))}
+            </div>
+          </div>
+
+          <div class="project-footer relative z-10">
+            <span class="category-badge">{c.catLabel}</span>
+            <div class="card-icon shrink-0">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="h-5 w-5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M6.75 7.5 10 9.75 6.75 12m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z"
+                />
+              </svg>
+            </div>
+            <span class="view-hint">
+              <span class="view-hint-text">
+                {locale === "zh" ? "前往專案詳細頁" : "Open project details"}
+              </span>
+              <svg class="view-hint-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+                ></path>
+              </svg>
+            </span>
+          </div>
+        </div>
+      </a>
+    ))
+  }
+</div>
+
+<script is:inline>
+  (function () {
+    var btns = document.querySelectorAll("[data-projects-filter]");
+    var cards = document.querySelectorAll("#projects-grid .project-card");
+    if (!btns.length) return;
+    btns.forEach(function (b) {
+      b.addEventListener("click", function () {
+        var key = b.getAttribute("data-filter");
+        btns.forEach(function (x) {
+          var on = x === b;
+          x.classList.toggle("filter-active", on);
+          x.setAttribute("aria-pressed", on ? "true" : "false");
+        });
+        cards.forEach(function (c) {
+          var show = key === "all" || c.getAttribute("data-category") === key;
+          c.classList.toggle("filter-hidden", !show);
+        });
+      });
+    });
+  })();
+</script>

@@ -1,0 +1,116 @@
+---
+import type { Locale } from "../lib/i18n";
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props as Props;
+
+const icons: Record<string, string> = {
+  detect:
+    '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/><path d="M11 8v6M8 11h6"/>',
+  fab: '<path d="M3 20h18"/><path d="M5 20V9l5 3V9l5 3V9l4 2v9"/><path d="M9 20v-4h6v4"/>',
+  thermal:
+    '<path d="M12 3v10"/><path d="M12 13a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/><path d="M8 6.5a6 6 0 0 0 0 11"/><path d="M16 6.5a6 6 0 0 1 0 11"/>',
+  edge: '<rect x="4" y="6" width="16" height="12" rx="2"/><path d="M9 10h.01M15 10h.01M9 14h6"/>',
+  quality:
+    '<path d="M4 19V5"/><path d="M4 19h16"/><rect x="7" y="11" width="3" height="5"/><rect x="12" y="8" width="3" height="8"/><rect x="17" y="13" width="3" height="3"/>',
+  globe:
+    '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z"/>'
+};
+
+const items =
+  locale === "zh"
+    ? [
+        {
+          k: "detect",
+          t: "SiC 晶圓缺陷檢測",
+          d: "以 YOLO 建立 TSD／TED／BPD 三類缺陷的標註資料集，比較 v8/v10/v11/v12 確認 v12 最佳。"
+        },
+        {
+          k: "fab",
+          t: "試驗工廠建立",
+          d: "SiC 高溫材料試驗產線從零建置，橫跨技術評估、環保法規、資材與人員整合。"
+        },
+        {
+          k: "thermal",
+          t: "熱場模擬",
+          d: "COMSOL 多物理量模擬支援高溫製程條件評估與熱場最佳化。"
+        },
+        {
+          k: "edge",
+          t: "邊緣 AI 部署",
+          d: "NVIDIA Jetson 實作，讓推論在產線端即時完成，不依賴雲端連線。"
+        },
+        {
+          k: "quality",
+          t: "良率與品質管理",
+          d: "配方改善、檢測規範建立、綠建材認證協助；台化地毯 9 年成本與績效管理。"
+        },
+        {
+          k: "globe",
+          t: "外銷與國際溝通",
+          d: "9 年外銷新客戶開發、客訴處理與展場規劃，TOEIC 825。"
+        }
+      ]
+    : [
+        {
+          k: "detect",
+          t: "SiC wafer defect detection",
+          d: "Built an annotated TSD/TED/BPD dataset and compared YOLO v8/v10/v11/v12 — v12 performed best."
+        },
+        {
+          k: "fab",
+          t: "Pilot fab build-out",
+          d: "An SiC high-temperature materials trial line built from scratch, spanning technical evaluation, environmental compliance, procurement and staffing."
+        },
+        {
+          k: "thermal",
+          t: "Thermal simulation",
+          d: "COMSOL multiphysics simulation supporting high-temperature process evaluation and thermal optimisation."
+        },
+        {
+          k: "edge",
+          t: "Edge AI deployment",
+          d: "NVIDIA Jetson hands-on, so inference completes on the line instead of depending on a cloud link."
+        },
+        {
+          k: "quality",
+          t: "Yield and quality management",
+          d: "Formulation improvement, inspection-standard authoring, US green-building certification support; nine years of cost and performance management."
+        },
+        {
+          k: "globe",
+          t: "Export and international work",
+          d: "Nine years of export new-business development, complaint handling and trade-fair planning. TOEIC 825."
+        }
+      ];
+---
+
+<div class="services-grid mx-auto max-w-5xl">
+  {
+    items.map((x, i) => (
+      <div class="svc-card reveal" style={`transition-delay:${i * 0.06}s`}>
+        <div class="svc-inner">
+          <div class="svc-icon-box">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              class="svc-svg"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              set:html={icons[x.k]}
+            />
+          </div>          <div class="svc-content">
+            <h3 class="svc-title">{x.t}</h3>
+            <p class="svc-desc">{x.d}</p>
+          </div>
+        </div>
+      </div>
+    ))
+  }
+</div>

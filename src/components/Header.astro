@@ -1,0 +1,511 @@
+---
+import { altPath, type Locale } from "../lib/i18n";
+import { contact } from "../data/contact";
+
+interface Props {
+  locale: Locale;
+  anchors: { href: string; label: string }[];
+}
+const { locale, anchors } = Astro.props;
+const megaItems =
+  locale === "zh"
+    ? [
+        { href: safe(contact.links.github, "#projects"), label: "GitHub", desc: "開源程式與業外技術實作" },
+        { href: "https://hdl.handle.net/11296/197078", label: "學位論文", desc: "SiC 晶圓 YOLO 缺陷檢測研究" },
+        { href: `/${locale}/resume/`, label: "線上履歷", desc: "A4 可列印完整履歷與下載" },
+        { href: `/${locale}/contact/`, label: "聯絡我", desc: "線上表單，快速取得回覆" }
+      ]
+    : [
+        { href: safe(contact.links.github, "#projects"), label: "GitHub", desc: "Open-source work and side experiments" },
+        { href: "https://hdl.handle.net/11296/197078", label: "Thesis", desc: "SiC wafer YOLO defect detection study" },
+        { href: `/${locale}/resume/`, label: "Résumé", desc: "Printable A4 CV and downloads" },
+        { href: `/${locale}/contact/`, label: "Contact", desc: "Use the form to reach me quickly" }
+      ];
+
+function safe(href: string, fallback: string) {
+  return !href || href === "TODO" ? fallback : href;
+}
+const other = locale === "zh" ? "en" : "zh";
+const otherLabel = locale === "zh" ? "EN" : "中文";
+const href = altPath(Astro.url.pathname, other);
+const atHome = Astro.url.pathname.replace(/\/+$/, "") === `/${locale}`;
+---
+
+<header class="glass-nav fixed inset-x-0 top-0 z-50" data-nav>
+  <nav class="container-x" aria-label="global">
+    <div class="flex h-16 items-center justify-between">
+      <a
+        href={`/${locale}/`}
+        class="gradient-text shrink-0 text-lg font-bold tracking-tight"
+        data-astro-cid-3ef6ksr2
+      >
+        {locale === "zh" ? "劉士禎" : "Shih-Chen Liu"}
+      </a>
+
+      {
+        atHome && (
+          <div class="hidden items-center gap-6 lg:flex">
+            {anchors.map((a) => (
+              <a href={a.href} class="nav-link" data-nav-link={a.href.slice(1)}>
+                {a.label}
+              </a>
+            ))}
+          </div>
+        )
+      }
+
+      <div class="flex items-center gap-3">
+        <a
+          href={href}
+          hreflang={other}
+          class="rounded-md border border-[var(--border)] px-2.5 py-1.5 text-xs font-semibold hover:border-[var(--accent)] hover:text-[var(--accent)]"
+          aria-label={other === "en" ? "Switch to English" : "切換為繁體中文"}
+        >
+          {otherLabel}
+        </a>
+
+        <label
+          class="switch"
+          title="Toggle light / dark mode"
+          aria-label="Toggle light / dark mode"
+        >
+          <span class="sun">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <g fill="#918155">
+                <circle r="5" cy="12" cx="12" />
+                <path
+                  d="m21 13h-1a1 1 0 0 1 0-2h1a1 1 0 0 1 0 2zm-17 0h-1a1 1 0 0 1 0-2h1a1 1 0 0 1 0 2zm13.66-5.66a1 1 0 0 1-.66-.29 1 1 0 0 1 0-1.41l.71-.71a1 1 0 1 1 1.41 1.41l-.71.71a1 1 0 0 1-.75.29zm-12.02 12.02a1 1 0 0 1-.71-.29 1 1 0 0 1 0-1.41l.71-.66a1 1 0 1 1 1.41 1.41l-.71.71a1 1 0 0 1-.7.24zm6.36-14.36a1 1 0 0 1-1-1v-1a1 1 0 0 1 2 0v1a1 1 0 0 1-1 1zm0 17a1 1 0 0 1-1-1v-1a1 1 0 0 1 2 0v1a1 1 0 0 1-1 1zm-5.66-14.66a1 1 0 0 1-.7-.29l-.71-.71a1 1 0 0 1 1.41-1.41l.71.71a1 1 0 0 1 0 1.41l-.71.29zm12.02 12.02a1 1 0 0 1-.7-.29l-.66-.71a1 1 0 0 1 1.36-1.36l.71.71a1 1 0 0 1 0 1.41l-.71.29z"
+                ></path>
+              </g>
+            </svg>
+          </span>
+          <span class="moon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+              <path
+                d="m223.5 32c-123.5 0-223.5 100.3-223.5 224s100 224 223.5 224c60.6 0 115.5-24.2 155.8-63.4 5-4.9 6.3-12.5 3.1-18.7s-10.1-9.7-17-8.5c-9.8 1.7-19.8 2.6-30.1 2.6-96.9 0-175.5-78.8-175.5-176 0-65.8 36-123.1 89.3-153.3 6.1-3.5 9.2-10.5 7.7-17.3s-7.3-11.9-14.3-12.5c-6.3-.5-12.6-.8-19-.8z"
+              ></path>
+            </svg>
+          </span>
+          <input type="checkbox" class="input" id="theme-checkbox" />
+          <span class="slider"></span>
+        </label>
+
+        <a href={`/${locale}/contact/`} class="cta-btn hidden sm:inline-flex">
+          {locale === "zh" ? "聯絡我" : "Contact Me"}
+        </a>
+
+        <button id="menu-open-btn" class="hamburger-btn" aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+
+    <div id="dm-wrapper" class="dm-wrapper">
+      <div class="desktop-mega">
+        {
+          megaItems.map((m, i) => (
+            <a
+              href={m.href}
+              class="dm-item"
+              style={`--i:${i}`}
+              {...(m.href.startsWith("http") ? { target: "_blank", rel: "noopener" } : {})}
+            >
+              <span class="dm-num">{String(i + 1).padStart(2, "0")}</span>
+              <span class="dm-body">
+                <span class="dm-label">{m.label}</span>
+                <span class="dm-desc">{m.desc}</span>
+              </span>
+              <svg
+                class="dm-arrow"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"
+                />
+              </svg>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </nav>
+</header>
+
+<!-- 行動版全屏選單 -->
+<div
+  id="overlay-menu"
+  class="overlay"
+  role="dialog"
+  aria-modal="true"
+  aria-label={locale === "zh" ? "網站導覽" : "Site navigation"}
+  aria-hidden="true"
+>
+  <button id="menu-close-btn" class="overlay-close" aria-label={locale === "zh" ? "關閉" : "Close menu"}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+    </svg>
+  </button>
+  <div class="overlay-glow" aria-hidden="true"></div>
+  <div class="overlay-inner">
+    <p class="overlay-eyebrow">{locale === "zh" ? "探索" : "Explore"}</p>
+    <nav class="overlay-nav">
+      {
+        anchors.map((a, i) => (
+          <a href={a.href} class="overlay-link" style={`--i:${i}`}>
+            <span class="overlay-num">{String(i + 1).padStart(2, "0")}</span>
+            <span class="overlay-link-body">
+              <span class="overlay-link-label">{a.label}</span>
+            </span>
+            <svg class="overlay-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"
+              />
+            </svg>
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</div>
+
+<style is:global>
+  /* toggle switch — reference: .switch / .slider / .sun / .moon */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 64px;
+    height: 34px;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: filter 0.5s ease-in-out, transform 0.5s ease-in-out;
+    transform: scale(0.75);
+    filter: saturate(1.25) brightness(1.33);
+  }
+  .switch:hover,
+  .switch:focus-within {
+    filter: saturate(1.5) brightness(1.5);
+  }
+  .switch:focus-within .slider {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .slider {
+    position: absolute;
+    inset: 0;
+    cursor: pointer;
+    background-color: var(--bg-surface);
+    transition: 0.4s;
+    border-radius: 30px;
+  }
+  .slider::before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: var(--text-muted);
+    transition: 0.4s;
+    border-radius: 50%;
+  }
+  .switch .sun svg {
+    position: absolute;
+    top: 6px;
+    left: 36px;
+    z-index: 1;
+    width: 24px;
+    height: 24px;
+    animation: sw-rotate 30s linear infinite;
+  }
+  .switch .moon svg {
+    fill: var(--text-muted);
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    z-index: 1;
+    width: 24px;
+    height: 24px;
+    animation: sw-tilt 5s linear infinite;
+  }
+  .switch .sun {
+    display: block;
+  }
+  .switch .moon {
+    display: none;
+  }
+  .switch:has(input:checked) .sun {
+    display: none;
+  }
+  .switch:has(input:checked) .moon {
+    display: block;
+  }
+  .switch input:checked + .slider {
+    background-color: var(--bg-card);
+  }
+  .switch input:checked + .slider::before {
+    transform: translateX(30px);
+    background-color: var(--accent-blue);
+  }
+  @keyframes sw-rotate {
+    0% {
+      transform: rotate(0);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes sw-tilt {
+    0%,
+    100% {
+      transform: rotate(0);
+    }
+    25% {
+      transform: rotate(-10deg);
+    }
+    75% {
+      transform: rotate(10deg);
+    }
+  }
+
+  /* mobile overlay — reference: .overlay* */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 1rem 6vw 3rem;
+    background: var(--bg-overlay);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+  }
+  .overlay.open {
+    opacity: 1;
+    visibility: visible;
+  }
+  .overlay-close {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .overlay-close svg {
+    width: 22px;
+    height: 22px;
+  }
+  .overlay-glow {
+    position: absolute;
+    top: -10%;
+    right: -5%;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .overlay-eyebrow {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--neon);
+    margin-bottom: 1rem;
+  }
+  .overlay-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .overlay-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.7rem 0.25rem;
+    border-bottom: 1px solid var(--border);
+    transition: padding-left 0.25s, color 0.25s;
+  }
+  .overlay-link:hover {
+    padding-left: 0.75rem;
+    color: var(--neon);
+  }
+  .overlay-num {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+  .overlay-link-label {
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+  .overlay-arrow {
+    width: 20px;
+    height: 20px;
+    margin-left: auto;
+    flex-shrink: 0;
+    opacity: 0.5;
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    // 這支 script 位於 <head> 區段的 header 內，執行時 <main> 尚未解析完成，
+    // 因此 .reveal / section[id] 的觀察必須等 DOMContentLoaded。
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", function () {
+        run();
+      });
+      return;
+    }
+    run();
+
+    function run() {
+      var root = document.documentElement;
+    var key = root.dataset.themeKey || "portfolio-theme";
+    var box = document.getElementById("theme-checkbox");
+    var meta = document.getElementById("meta-theme-color");
+
+    function apply(theme) {
+      if (theme === "light") {
+        root.setAttribute("data-theme", "light");
+        if (box) box.checked = true;
+        if (meta) meta.setAttribute("content", "#f8fafc");
+      } else {
+        root.removeAttribute("data-theme");
+        if (box) box.checked = false;
+        if (meta) meta.setAttribute("content", "#020617");
+      }
+    }
+    try {
+      apply(localStorage.getItem(key) || "dark");
+    } catch (e) {}
+    if (box) {
+      box.addEventListener("change", function () {
+        var t = box.checked ? "light" : "dark";
+        try {
+          localStorage.setItem(key, t);
+        } catch (e) {}
+        apply(t);
+      });
+    }
+
+    // 捲動陰影
+    var nav = document.querySelector("[data-nav]");
+    var ticking = false;
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () {
+        if (nav) {
+          if (window.innerWidth >= 1024) nav.classList.toggle("scrolled", window.scrollY > 40);
+          else nav.classList.remove("scrolled");
+        }
+        ticking = false;
+      });
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+
+    // 錨點高亮
+    var links = document.querySelectorAll("[data-nav-link]");
+    var sections = document.querySelectorAll("section[id]");
+    function markActive(id) {
+      links.forEach(function (l) {
+        l.classList.toggle("active", l.getAttribute("data-nav-link") === id);
+      });
+    }
+    // 點擊導覽時立即標示（IntersectionObserver 的觀察帶在錨點定位時對不到）
+    links.forEach(function (l) {
+      l.addEventListener("click", function () {
+        markActive(l.getAttribute("data-nav-link"));
+      });
+    });
+    if (links.length && sections.length && "IntersectionObserver" in window) {
+      var io = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (en) {
+            if (!en.isIntersecting) return;
+            markActive(en.target.id);
+          });
+        },
+        // 頻寬比參考站寬，free scroll 時較容易命中
+        { rootMargin: "-10% 0px -75% 0px" }
+      );
+      sections.forEach(function (s) {
+        io.observe(s);
+      });
+    }
+
+    // 行動版選單
+    var overlay = document.getElementById("overlay-menu");
+    var openBtn = document.getElementById("menu-open-btn");
+    var closeBtn = document.getElementById("menu-close-btn");
+    function open() {
+      overlay.classList.add("open");
+      overlay.setAttribute("aria-hidden", "false");
+      openBtn.setAttribute("aria-expanded", "true");
+      document.body.style.overflow = "hidden";
+    }
+    function close() {
+      overlay.classList.remove("open");
+      overlay.setAttribute("aria-hidden", "true");
+      openBtn.setAttribute("aria-expanded", "false");
+      document.body.style.overflow = "";
+    }
+    if (openBtn) openBtn.addEventListener("click", open);
+    if (closeBtn) closeBtn.addEventListener("click", close);
+    overlay.querySelectorAll(".overlay-link").forEach(function (a) {
+      a.addEventListener("click", close);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") close();
+    });
+
+    // 捲動進場
+    if ("IntersectionObserver" in window) {
+      var ro = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (en) {
+            if (en.isIntersecting) {
+              en.target.classList.add("visible");
+              ro.unobserve(en.target);
+            }
+          });
+        },
+        { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+      );
+      document.querySelectorAll(".reveal").forEach(function (el) {
+        ro.observe(el);
+      });
+    } else {
+      document.querySelectorAll(".reveal").forEach(function (el) {
+        el.classList.add("visible");
+      });
+    }
+    }
+  })();
+</script>

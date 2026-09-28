@@ -1,0 +1,120 @@
+---
+import type { Locale } from "../lib/i18n";
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props as Props;
+
+const icon = (id: string) => `/images/icons/skills/${id}.svg`;
+
+const groups =
+  locale === "zh"
+    ? [
+        {
+          t: "半導體與製程",
+          d: 0,
+          items: [
+            { id: "sic", n: "碳化矽 SiC" },
+            { id: "gen3", n: "第三代半導體" },
+            { id: "semi", n: "半導體製造" },
+            { id: "mfg", n: "廠務工程" },
+            { id: "pe", n: "製程改善" }
+          ]
+        },
+        {
+          t: "AI 與機器視覺",
+          d: 0.1,
+          items: [
+            { id: "yolo", n: "YOLO" },
+            { id: "defect", n: "缺陷檢測" },
+            { id: "vision", n: "機器視覺" },
+            { id: "dl", n: "深度學習" },
+            { id: "edgeai", n: "邊緣 AI" },
+            { id: "jetson", n: "NVIDIA Jetson" }
+          ]
+        },
+        {
+          t: "模擬與數據",
+          d: 0,
+          items: [
+            { id: "comsol", n: "COMSOL 熱場模擬" },
+            { id: "yield", n: "良率分析" },
+            { id: "qa", n: "品質保證" }
+          ]
+        },
+        {
+          t: "專案與流程",
+          d: 0.1,
+          items: [
+            { id: "pm", n: "專案管理" },
+            { id: "cost", n: "成本與績效" },
+            { id: "green", n: "綠建材認證" },
+            { id: "toeic", n: "外銷英文 TOEIC 825" }
+          ]
+        }
+      ]
+    : [
+        {
+          t: "Semiconductor & Process",
+          d: 0,
+          items: [
+            { id: "sic", n: "Silicon Carbide" },
+            { id: "gen3", n: "Third-gen Devices" },
+            { id: "semi", n: "Semiconductor Mfg" },
+            { id: "mfg", n: "Facilities Eng" },
+            { id: "pe", n: "Process Improvement" }
+          ]
+        },
+        {
+          t: "AI & Machine Vision",
+          d: 0.1,
+          items: [
+            { id: "yolo", n: "YOLO" },
+            { id: "defect", n: "Defect Detection" },
+            { id: "vision", n: "Machine Vision" },
+            { id: "dl", n: "Deep Learning" },
+            { id: "edgeai", n: "Edge AI" },
+            { id: "jetson", n: "NVIDIA Jetson" }
+          ]
+        },
+        {
+          t: "Simulation & Data",
+          d: 0,
+          items: [
+            { id: "comsol", n: "COMSOL Simulation" },
+            { id: "yield", n: "Yield Analysis" },
+            { id: "qa", n: "Quality Assurance" }
+          ]
+        },
+        {
+          t: "Project & Workflow",
+          d: 0.1,
+          items: [
+            { id: "pm", n: "Project Management" },
+            { id: "cost", n: "Cost & Performance" },
+            { id: "green", n: "Green Building" },
+            { id: "toeic", n: "Export English (825)" }
+          ]
+        }
+      ];
+---
+
+<div class="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-2">
+  {
+    groups.map((g) => (
+      <div class="card reveal" style={`transition-delay:${g.d}s`}>
+        <h3 class="mb-6 text-sm font-bold uppercase tracking-widest text-accent">{g.t}</h3>
+        <div class="skill-grid">
+          {g.items.map((s) => (
+            <div class="skill-item">
+              <img src={icon(s.id)} alt={s.n} class="skill-icon" loading="lazy" width="36" height="36" />
+              <span class="skill-name">{s.n}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    ))
+  }
+</div>
+
