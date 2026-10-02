@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" role="img" aria-label="SiC 第三代半導體試驗工廠">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0f1e"/>
+      <stop offset="55%" stop-color="#111a33"/>
+      <stop offset="100%" stop-color="#060a15"/>
+    </linearGradient>
+    <linearGradient id="ttl" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+    <pattern id="p" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M30 0H0V30" fill="none" stroke="#ffffff" stroke-opacity="0.05"/>
+    </pattern>
+  </defs>
+  <rect width="600" height="600" fill="url(#bg)"/>
+  <rect width="600" height="600" fill="url(#p)"/>
+  <rect x="0" y="0" width="600" height="6" fill="url(#ttl)"/>
+  
+    <g opacity="0.8">
+    <rect x="60" y="150" width="46" height="300" fill="#22d3ee" fill-opacity="0.14" stroke="#22d3ee" stroke-opacity="0.35"/><rect x="122" y="150" width="46" height="300" fill="#0ea5e9" fill-opacity="0.14" stroke="#0ea5e9" stroke-opacity="0.35"/><rect x="184" y="150" width="46" height="300" fill="#22d3ee" fill-opacity="0.14" stroke="#22d3ee" stroke-opacity="0.35"/><rect x="246" y="150" width="46" height="300" fill="#0ea5e9" fill-opacity="0.14" stroke="#0ea5e9" stroke-opacity="0.35"/><rect x="308" y="150" width="46" height="300" fill="#22d3ee" fill-opacity="0.14" stroke="#22d3ee" stroke-opacity="0.35"/><rect x="370" y="150" width="46" height="300" fill="#0ea5e9" fill-opacity="0.14" stroke="#0ea5e9" stroke-opacity="0.35"/><rect x="432" y="150" width="46" height="300" fill="#22d3ee" fill-opacity="0.14" stroke="#22d3ee" stroke-opacity="0.35"/><rect x="494" y="150" width="46" height="300" fill="#0ea5e9" fill-opacity="0.14" stroke="#0ea5e9" stroke-opacity="0.35"/>
+    <path d="M40 420 L500 250" stroke="#0ea5e9" stroke-width="2" fill="none" stroke-opacity="0.6"/>
+    <path d="M40 470 L500 300" stroke="#22d3ee" stroke-width="2" fill="none" stroke-opacity="0.45"/>
+    <path d="M40 380 L500 360" stroke="#f59e0b" stroke-width="1.5" fill="none" stroke-opacity="0.5" stroke-dasharray="6 6"/>
+    </g>
+  <g font-family="'Segoe UI',system-ui,sans-serif">
+    <rect x="40" y="40" width="189.4" height="24" fill="#0ea5e9" fill-opacity="0.16" stroke="#0ea5e9" stroke-opacity="0.5"/>
+    <text x="53" y="57" font-size="13" letter-spacing="2" fill="#22d3ee">SMART MANUFACTURING</text>
+    <text x="40" y="524" font-size="27" font-weight="700" fill="#f1f5f9">SiC 第三代半導體試驗工廠</text>
+    <text x="40" y="552" font-family="monospace" font-size="14" letter-spacing="1.6" fill="#94a3b8">PROCESS INTEGRATION / YIELD</text>
+  </g>
+</svg>

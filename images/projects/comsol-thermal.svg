@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600" role="img" aria-label="COMSOL 熱場模擬與散熱最佳化">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0f1e"/>
+      <stop offset="55%" stop-color="#111a33"/>
+      <stop offset="100%" stop-color="#060a15"/>
+    </linearGradient>
+    <linearGradient id="ttl" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+    <pattern id="p" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M30 0H0V30" fill="none" stroke="#ffffff" stroke-opacity="0.05"/>
+    </pattern>
+  </defs>
+  <rect width="600" height="600" fill="url(#bg)"/>
+  <rect width="600" height="600" fill="url(#p)"/>
+  <rect x="0" y="0" width="600" height="6" fill="url(#ttl)"/>
+  
+    <g opacity="0.85" fill="none" stroke-width="2">
+    <path d="M30 160 C 140 120, 200 200, 320 160 S 470 120, 570 160" stroke="#a855f7" stroke-opacity="0.75"/><path d="M30 194 C 140 156, 200 232, 320 194 S 470 156, 570 194" stroke="#6366f1" stroke-opacity="0.7"/><path d="M30 228 C 140 192, 200 264, 320 228 S 470 192, 570 228" stroke="#6366f1" stroke-opacity="0.65"/><path d="M30 262 C 140 228, 200 296, 320 262 S 470 228, 570 262" stroke="#a855f7" stroke-opacity="0.6"/><path d="M30 296 C 140 264, 200 328, 320 296 S 470 264, 570 296" stroke="#6366f1" stroke-opacity="0.55"/><path d="M30 330 C 140 300, 200 360, 320 330 S 470 300, 570 330" stroke="#6366f1" stroke-opacity="0.5"/><path d="M30 364 C 140 336, 200 392, 320 364 S 470 336, 570 364" stroke="#a855f7" stroke-opacity="0.44999999999999996"/><path d="M30 398 C 140 372, 200 424, 320 398 S 470 372, 570 398" stroke="#6366f1" stroke-opacity="0.39999999999999997"/><path d="M30 432 C 140 408, 200 456, 320 432 S 470 408, 570 432" stroke="#6366f1" stroke-opacity="0.35"/><path d="M30 466 C 140 444, 200 488, 320 466 S 470 444, 570 466" stroke="#a855f7" stroke-opacity="0.3"/><path d="M30 500 C 140 480, 200 520, 320 500 S 470 480, 570 500" stroke="#6366f1" stroke-opacity="0.25"/><path d="M30 534 C 140 516, 200 552, 320 534 S 470 516, 570 534" stroke="#6366f1" stroke-opacity="0.19999999999999996"/>
+    </g>
+    <rect x="230" y="230" width="140" height="100" fill="#0b1020" fill-opacity="0.7" stroke="#a855f7"/>
+    <text x="300" y="290" font-family="monospace" font-size="34" fill="#e2e8f0" text-anchor="middle">72.4&#176;C</text>
+  <g font-family="'Segoe UI',system-ui,sans-serif">
+    <rect x="40" y="40" width="112" height="24" fill="#a855f7" fill-opacity="0.16" stroke="#a855f7" stroke-opacity="0.5"/>
+    <text x="53" y="57" font-size="13" letter-spacing="2" fill="#6366f1">SIMULATION</text>
+    <text x="40" y="524" font-size="27" font-weight="700" fill="#f1f5f9">COMSOL 熱場模擬與散熱最佳化</text>
+    <text x="40" y="552" font-family="monospace" font-size="14" letter-spacing="1.6" fill="#94a3b8">THERMAL / FINITE ELEMENT</text>
+  </g>
+</svg>
