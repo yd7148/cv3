@@ -831,6 +831,13 @@ html:not([data-theme="light"]) {
   html[data-theme="light"] p.text-backdrop {
     color: var(--bg-nav);
   }
+  /* .text-backdrop 的背景是寫死的深色（#020617b8），兩個主題都一樣，
+     所以文字顏色必須固定為淺色。原先只有 h1 與 p 有淺色覆寫，
+     其他標籤（如 hero 的職稱 <div>）在淺色模式會繼承深色 --text，
+     變成深字配深底、完全看不清。 */
+  html[data-theme="light"] .text-backdrop {
+    color: rgba(248, 250, 252, 0.92);
+  }
 
   /* ==== hero social links (reference: .hero-social-link) ==== */
   .hero-social-link {
