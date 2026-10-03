@@ -832,11 +832,20 @@ html:not([data-theme="light"]) {
     color: var(--bg-nav);
   }
   /* .text-backdrop 的背景是寫死的深色（#020617b8），兩個主題都一樣，
-     所以文字顏色必須固定為淺色。原先只有 h1 與 p 有淺色覆寫，
-     其他標籤（如 hero 的職稱 <div>）在淺色模式會繼承深色 --text，
-     變成深字配深底、完全看不清。 */
-  html[data-theme="light"] .text-backdrop {
+     所以底下的文字（包含 text-xl / text-dimmed 等工具類）都必須固定為淺色，
+     否則淺色模式會變成深字配深底、完全看不清。
+     必須寫到「後代」層級，因為那些 p 有自己的工具類會蓋掉繼承值。 */
+  html[data-theme="light"] .text-backdrop,
+  html[data-theme="light"] .text-backdrop p,
+  html[data-theme="light"] .text-backdrop h1,
+  html[data-theme="light"] .text-backdrop h2,
+  html[data-theme="light"] .text-backdrop h3,
+  html[data-theme="light"] .text-backdrop span {
     color: rgba(248, 250, 252, 0.92);
+  }
+  /* 次要文字（副標）維持一點層次，但一樣要是淺色 */
+  html[data-theme="light"] .text-backdrop .text-dimmed {
+    color: rgba(248, 250, 252, 0.7);
   }
 
   /* ==== hero social links (reference: .hero-social-link) ==== */
