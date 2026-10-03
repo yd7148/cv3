@@ -1,5 +1,5 @@
 ---
-import { altPath, type Locale } from "../lib/i18n";
+import { altPath, stripBase, type Locale } from "../lib/i18n";
 import { contact } from "../data/contact";
 
 interface Props {
@@ -27,8 +27,8 @@ function safe(href: string, fallback: string) {
 }
 const other = locale === "zh" ? "en" : "zh";
 const otherLabel = locale === "zh" ? "EN" : "中文";
-const href = altPath(Astro.url.pathname, other);
-const atHome = Astro.url.pathname.replace(/\/+$/, "") === `/${locale}`;
+const href = altPath(stripBase(Astro.url.pathname, import.meta.env.BASE_URL), other);
+const atHome = stripBase(Astro.url.pathname, import.meta.env.BASE_URL).replace(/\/+$/, "") === `/${locale}`;
 ---
 
 <header class="glass-nav fixed inset-x-0 top-0 z-50" data-nav>

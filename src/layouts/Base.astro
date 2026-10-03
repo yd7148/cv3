@@ -1,6 +1,6 @@
 ---
 import "../styles/global.css";
-import { altPath, SITE_URL, type Locale } from "../lib/i18n";
+import { altPath, stripBase, SITE_URL, type Locale } from "../lib/i18n";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 
@@ -14,7 +14,10 @@ interface Props {
 
 const { locale, title, description, noindex = false, navAnchors = [] } = Astro.props;
 const path = Astro.url.pathname;
-const alt = altPath(path, locale === "zh" ? "en" : "zh");
+// Astro.url.pathname 在正式環境含 base 前綴（/cv3/），altPath 只認 /zh/、/en/，
+// 不先剝掉 base 會算出 /en/cv3/zh/ 這種錯誤連結。
+const pathNoBase = stripBase(path, import.meta.env.BASE_URL);
+const alt = altPath(pathNoBase, locale === "zh" ? "en" : "zh");
 const abs = (p: string) => new URL(p, SITE_URL).href;
 
 const anchors: { href: string; label: string }[] =
